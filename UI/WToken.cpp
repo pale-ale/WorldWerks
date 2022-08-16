@@ -4,7 +4,7 @@
 
 WToken::WToken(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
                const Token &token)
-    : UIElement(uiSystem, parent), token{token} {
+    : WButton(uiSystem, parent), token{token} {
   setup_sprite();
 }
 

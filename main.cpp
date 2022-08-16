@@ -9,8 +9,8 @@
 #include "UI/WBoard.hpp"
 
 bool RUNNING = true;
-int PIXELSCALE = 3;
-sf::Vector2f RESOLUTION(400, 250);
+int PIXELSCALE = 2;
+sf::Vector2f RESOLUTION(600, 350);
 sf::Vector2f WINDOW_SIZE(RESOLUTION.x* PIXELSCALE, RESOLUTION.y* PIXELSCALE);
 
 InputManager inputManager;
@@ -19,8 +19,6 @@ UISystem uiSystem(RESOLUTION);
 int main() {
   SpriteLoader::spriteFolderPath = "/home/alba/projects/WorldWerks/Sprites/";
   SpriteLoader::spriteKeys = {{"MapImage", "parchmentmap.png"}};
-  auto testElem = uiSystem.create_widget<Textbox>(uiSystem.get_root(), "some text", sf::Vector2f(50, 10));
-
   
   sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE.x, WINDOW_SIZE.y),
                           "WorldWerks");
@@ -33,9 +31,9 @@ int main() {
   sf::Event event;
 
   Board board;
-  Token token(0, {100, 200});
+  Token token(0, {150, 200}, "Token, Destroyer of Friendships");
   board.tokens.push_back(token);
-  uiSystem.create_widget<WBoard>(uiSystem.get_root(), const_cast<const Board*>(&board), SpriteLoader::getInstance());
+  uiSystem.create_widget<WBoard>(uiSystem.get_root(), const_cast<const Board*>(&board), SpriteLoader::getInstance(), RESOLUTION);
 
   auto cb = [](const sf::Event &event, const sf::Vector2i &mousePos){uiSystem.event_callback(event, mousePos);};
   inputManager.register_callback(cb, InputEventType::KeyboardEvent);

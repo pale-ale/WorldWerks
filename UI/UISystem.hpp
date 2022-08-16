@@ -11,17 +11,20 @@ class UISystem : public sf::Drawable {
  public:
   UISystem(sf::Vector2f viewportSize);
 
-  /* The only way to create Widgets, to ensure they are managed correctly. */
+  /*
+    Create a UIElement (or a class inheriting from it)
+    and add it to the widget tree to be managed by this UISystem.
+  */
   template <class C, typename... Args>
-  std::shared_ptr<UIElement> create_widget(std::shared_ptr<UIElement> parent,
-                                           Args &&...args) {
+  std::shared_ptr<C> create_widget(std::shared_ptr<UIElement> parent,
+                                   Args &&...args) {
     std::shared_ptr<UIElement> newWidget =
         std::shared_ptr<C>(new C(this, parent, args...));
     newWidget->post_init();
     if (parent) {
       parent->add_child(newWidget, parent);
     }
-    return newWidget;
+    return std::dynamic_pointer_cast<C>(newWidget);
   };
 
   /* Used to pass events into the UISystem to be distributed to the Widgets. */

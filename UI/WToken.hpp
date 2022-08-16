@@ -4,9 +4,9 @@
 
 #include "../SpriteLoader/SpriteLoader.h"
 #include "../Tabletop/Token.hpp"
-#include "UIElement.hpp"
+#include "WButton.hpp"
 
-class WToken : public UIElement {
+class WToken : public WButton {
  public:
   /* The Token displayed by this Widget. */
   const Token token;

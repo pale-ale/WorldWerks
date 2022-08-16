@@ -1,27 +1,42 @@
 #include "WBoard.hpp"
+#include "TokenUI.hpp"
 
 constexpr float clamp(float a, float x, float b){return std::min(std::max(a, x), b);}
 
 WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent,
-               const Board* board, SpriteLoader* spriteloader)
-    : UIElement(uiSystem, parent), board{board}, uiSystem{uiSystem} {
-  boardTexture = spriteloader->get_texture("MapImage");
-  sprite.setTexture(boardTexture);
+               const Board* board, SpriteLoader* spriteloader, const sf::Vector2f &size)
+    : UIElement(uiSystem, parent, size), board{board}, uiSystem{uiSystem} {
+  auto boardTexture = spriteloader->get_texture("MapImage");
+  sf::RenderTexture rtex;
+  rtex.create(size.x, size.y);
+  rtex.clear(sf::Color(60, 50, 25));
+  rtex.draw(sf::Sprite(boardTexture));
+  rtex.display();
+  texture = rtex.getTexture();
+  sprite.setTexture(texture);
   set_scale(1.0f);
 }
 
-void WBoard::post_init() { update_tokens(); }
+void WBoard::post_init() {
+  update_tokens();
+  tokenUI = uiSystem->create_widget<TokenUI>(shared_from_this(), sf::Vector2f{size.x / 4, size.y});
+  tokenUI->update_position({size.x - tokenUI->size.x, 0});
+}
 
 void WBoard::update_tokens() {
   children.clear();
-  // tokenWidgets.clear();
   for (auto&& token : board->tokens) {
-    uiSystem->create_widget<WToken>(shared_from_this(), token);
+    auto tokenButton = uiSystem->create_widget<WToken>(shared_from_this(), token);
+    tokenButton->buttonClickCallback = [this, token](){display_token(&token);};
   }
 }
 
+void WBoard::display_token(const Token *token){
+  tokenUI->set_token(token);
+}
+
 void WBoard::update_board_view() {
-  int boardW = boardTexture.getSize().x, boardH = boardTexture.getSize().y;
+  int boardW = texture.getSize().x, boardH = texture.getSize().y;
   int scaledW = boardW * viewScale, scaledH = boardH * viewScale;
   int diffW = boardW - scaledW, diffH = boardH - scaledH;
 
@@ -43,7 +58,6 @@ void WBoard::update_board_view() {
 }
 
 void WBoard::event_key_down(const sf::Event& keyEvent) {
-  //printf("Scale is now %f. Code = %d\n", viewScale, keyEvent.key.code);
   if (!keyEvent.key.control) {
     return;
   }
