@@ -2,15 +2,14 @@
 
 #include "../Math.hpp"
 
-WToken::WToken(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
-               const Token &token)
+WToken::WToken(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const Token &token)
     : WButton(uiSystem, parent), token{token} {
   setup_sprite();
 }
 
 bool WToken::is_mouse_inside(const sf::Vector2i &mousePos) {
-  float dx = mousePos.x - token.gridPosition.x;
-  float dy = mousePos.y - token.gridPosition.y;
+  float dx = mousePos.x - token.position.x;
+  float dy = mousePos.y - token.position.y;
   float distance = length({dx, dy});
   return distance <= radius;
 }
@@ -37,6 +36,6 @@ void WToken::setup_sprite() {
   rtex->draw(tokenShape);
   rtex->display();
   sprite.setTexture(rtex->getTexture());
-  sprite.setPosition(token.gridPosition);
+  sprite.setPosition((float)token.position.x, (float)token.position.y);
   sprite.setOrigin(get_full_radius(), get_full_radius());
 }

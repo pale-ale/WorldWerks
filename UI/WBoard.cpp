@@ -1,12 +1,20 @@
 #include "WBoard.hpp"
+
 #include "TokenUI.hpp"
 
-constexpr float clamp(float a, float x, float b){return std::min(std::max(a, x), b);}
+constexpr float clamp(float a, float x, float b) { return std::min(std::max(a, x), b); }
 
-WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent,
-               const Board* board, SpriteLoader* spriteloader, const sf::Vector2f &size)
-    : UIElement(uiSystem, parent, size), board{board}, uiSystem{uiSystem} {
-  auto boardTexture = spriteloader->get_texture("MapImage");
+WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent, Board* board,
+               SpriteLoader* spriteloader, const sf::Vector2f& size)
+    : UIElement(uiSystem, parent, size), board{board} {
+  sf::Texture boardTexture;
+  for (auto&& tileset : board->get_map()->tilesets) {
+    if (tileset->name == "Background") {
+      std::string path = tileset->imagePath;
+      boardTexture.loadFromFile(path);
+    }
+  }
+
   sf::RenderTexture rtex;
   rtex.create(size.x, size.y);
   rtex.clear(sf::Color(60, 50, 25));
@@ -19,7 +27,8 @@ WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent,
 
 void WBoard::post_init() {
   update_tokens();
-  tokenUI = uiSystem->create_widget<TokenUI>(shared_from_this(), sf::Vector2f{size.x / 4, size.y});
+  tokenUI = uiSystem->create_widget<TokenUI>(shared_from_this(),
+                                             sf::Vector2f{size.x / 4, size.y});
   tokenUI->update_position({size.x - tokenUI->size.x, 0});
 }
 
@@ -27,13 +36,11 @@ void WBoard::update_tokens() {
   children.clear();
   for (auto&& token : board->tokens) {
     auto tokenButton = uiSystem->create_widget<WToken>(shared_from_this(), token);
-    tokenButton->buttonClickCallback = [this, token](){display_token(&token);};
+    tokenButton->buttonClickCallback = [this, token]() { display_token(&token); };
   }
 }
 
-void WBoard::display_token(const Token *token){
-  tokenUI->set_token(token);
-}
+void WBoard::display_token(const Token* token) { tokenUI->set_token(token); }
 
 void WBoard::update_board_view() {
   int boardW = texture.getSize().x, boardH = texture.getSize().y;
@@ -46,8 +53,10 @@ void WBoard::update_board_view() {
   mapTextureRect.width = scaledW;
   mapTextureRect.height = scaledH;
   // Adjust the desired pan to be compatible with the offset.
-  desiredPan.x = clamp(-zoomPanOffset.x, desiredPan.x, boardW - scaledW - zoomPanOffset.x);
-  desiredPan.y = clamp(-zoomPanOffset.y, desiredPan.y, boardH - scaledH - zoomPanOffset.y);
+  desiredPan.x =
+      clamp(-zoomPanOffset.x, desiredPan.x, boardW - scaledW - zoomPanOffset.x);
+  desiredPan.y =
+      clamp(-zoomPanOffset.y, desiredPan.y, boardH - scaledH - zoomPanOffset.y);
   // Apply the pan to the texture rect.
   mapTextureRect.left = desiredPan.x + zoomPanOffset.x;
   mapTextureRect.top = desiredPan.y + zoomPanOffset.y;
@@ -91,7 +100,7 @@ void WBoard::event_key_down(const sf::Event& keyEvent) {
   }
 }
 
-void WBoard::change_pan(int dx, int dy){
+void WBoard::change_pan(int dx, int dy) {
   desiredPan.x += dx;
   desiredPan.y += dy;
   update_board_view();
@@ -99,6 +108,6 @@ void WBoard::change_pan(int dx, int dy){
 
 void WBoard::set_scale(float newScale) {
   viewScale = clamp(minScale, newScale, maxScale);
-  printf("Scale is now %f.\n", viewScale);
+  printf("WBoard.cpp: Scale is now %f.\n", viewScale);
   update_board_view();
 }
