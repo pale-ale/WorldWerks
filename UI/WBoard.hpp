@@ -9,6 +9,12 @@
 class WBoard : public UIElement {
   friend UISystem;
 
+ public:
+  void display_token(Token *token);
+  
+  /** @brief WButton used to save the map */
+  std::shared_ptr<WButton> saveButton;
+
  protected:
   WBoard(UISystem *uiSystem, std::shared_ptr<UIElement> parent, Board *board,
          SpriteLoader *spriteloader, const sf::Vector2i &size);
@@ -21,13 +27,8 @@ class WBoard : public UIElement {
   virtual bool event_clicked() override;
 
  private:
-  void display_token(Token *token);
-
   /** @brief UIElement used to display the Token's information */
   std::shared_ptr<TokenUI> tokenUI;
-
-  /** @brief WButton used to save the map */
-  std::shared_ptr<WButton> saveButton;
 
   /** @brief The final texture of the board, with zoom and pan applied */
   sf::Texture texture;

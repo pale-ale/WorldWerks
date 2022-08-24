@@ -7,12 +7,13 @@ using Catch::Matchers::Equals;
 
 TEST_CASE("Edit TextBox", "[EditTextbox]"){
     auto ui = UISystem({0,0});
-    auto text = "text";
-    std::string str = text;
-    auto tb = ui.create_widget<Textbox>(ui.get_root(), &str);
+    std::string text = "text";
+    StrGetter g = [&text](){return text;};
+    StrSetter s = [&text](auto str){text = str;};
+    auto tb = ui.create_widget<Textbox>(ui.get_root(), StrBinding{g, s});
     tb->event_text_input('a');
-    REQUIRE_THAT(str, Equals("texta"));
+    REQUIRE_THAT(text, Equals("texta"));
     tb->event_text_input('\b');
     tb->event_text_input('\b');
-    REQUIRE_THAT(str, Equals("tex"));
+    REQUIRE_THAT(text, Equals("tex"));
 }

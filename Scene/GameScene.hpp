@@ -14,23 +14,28 @@ class GameScene : public SceneBase {
  public:
   GameScene(SceneContext* sceneContext) : SceneBase(sceneContext) {}
   virtual void event_load_scene() override {
-    tmx::MapParser mapParser;
-    mapParser.load_file("/home/alba/WorldWerksMap/ExampleMap.tmx");
+    auto load_path = "/home/alba/WorldWerksMap/ExampleMap.tmx";
+    auto save_path = "/home/alba/WorldWerksMap/Save_ExampleMap.tmx";
+    mp = new tmx::MapParser();
+    mp->load_file(load_path);
     auto res = sceneContext->resolution;
     auto uiSystem = sceneContext->uiSystem;
     if (!uiSystem) {
       printf("[GameScene]: SceneContext missing a UISystem.\n");
       return;
-    } else {
-      uiSystem->create_widget<WBoard>(uiSystem->get_root(), new Board(mapParser.map),
-                                      SpriteLoader::getInstance(),
-                                      sf::Vector2i{res.x, res.y});
-      printf("[GameScene]: Loaded.\n");
     }
+    auto boardWidget = uiSystem->create_widget<WBoard>(uiSystem->get_root(), new Board(mp->map),
+                                    SpriteLoader::getInstance(),
+                                    sf::Vector2i{res.x, res.y});
+    printf("[GameScene]: Loaded.\n");
+    boardWidget->saveButton->buttonClickCallback = [this, save_path]{mp->save_file(save_path);};
   }
 
  protected:
   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
     target.draw(*sceneContext->uiSystem, states);
   };
+
+ private:
+ tmx::MapParser *mp;
 };

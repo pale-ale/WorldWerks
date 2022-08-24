@@ -24,7 +24,7 @@ class TokenUI : public UIElement {
 
  private:
   virtual void post_init() override {
-    tokenTitle = uiSystem->create_widget<Textbox>(shared_from_this(), nullptr,
+    tokenTitle = uiSystem->create_widget<Textbox>(shared_from_this(), StrBinding(),
                                                   sf::Vector2i(size.x, 25));
   }
 

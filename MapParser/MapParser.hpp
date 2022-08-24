@@ -20,11 +20,12 @@ class MapParser {
   bool load_file(const std::string &path) {
     auto err = xmlDoc.LoadFile(path.c_str());
     if (err != tinyxml2::XMLError::XML_SUCCESS) {
-      printf("Error in XML Document: \n%s\n", xmlDoc.ErrorStr());
+      printf("[MapParser]: Error reading XML Document: \n%s\n", xmlDoc.ErrorStr());
       return false;
     }
     return extract(path.c_str());
   };
+
   /**
    * @brief Parse a string into a tmx::Map.
    *
@@ -35,16 +36,33 @@ class MapParser {
   bool load_text(const std::string &text, const char *mapPath = "") {
     auto err = xmlDoc.Parse(text.c_str());
     if (err != tinyxml2::XMLError::XML_SUCCESS) {
-      printf("Error in XML Document: \n%s\n", xmlDoc.ErrorStr());
+      printf("[MapParser]: Error reading XML Document: \n%s\n", xmlDoc.ErrorStr());
       return false;
     }
     return extract(mapPath);
   };
 
-  tmx::Map *map = nullptr; /** @brief Access the loaded tmx::Map after it's been parsed */
+  /**
+   * @brief Write the data in the data tree to disk.
+   *
+   * @param savePath The path where the file should be saved
+   * @return true: Success ---
+   * @return false: Could not save
+   */
+  bool save_file(const char *savePath) {
+    auto err = xmlDoc.SaveFile(savePath);
+    if (err != tinyxml2::XMLError::XML_SUCCESS) {
+      printf("[MapParser]: Error saving XML Document: \n%s\n", xmlDoc.ErrorStr());
+      return false;
+    }
+    printf("[MapParser]: Saved.\n");
+    return true;
+  }
+
+  /** @brief Access the loaded tmx::Map after it's been parsed */
+  tmx::Map *map = nullptr;
 
  private:
-  tinyxml2::XMLDocument xmlDoc; /** @brief Needed to extract XML data */
   /**
    * @brief Fill our tmx::Map with data.
    *
@@ -55,11 +73,13 @@ class MapParser {
     auto root = xmlDoc.RootElement();
     map = new Map();
     if (!map->parse(root, path)) {
-      printf("Error parsing the map node.");
+      printf("[MapParser]: Error parsing the map node.");
       return false;
     }
     return true;
   }
-};
 
+  /** @brief Needed to extract XML data */
+  tinyxml2::XMLDocument xmlDoc;
+};
 }  // namespace tmx

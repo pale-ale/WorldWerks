@@ -33,7 +33,7 @@ void WBoard::post_init() {
   sf::Vector2i saveButtonSize{100,20};
   saveButton = uiSystem->create_widget<WButton>(shared_from_this(), saveButtonSize);
   saveButton->update_position({(size.x - saveButtonSize.x) / 2, size.y - saveButtonSize.y});
-  saveButton->buttonClickCallback = [this]{printf("Save not implemented yet.\n");};
+  saveButton->buttonClickCallback = [this]{printf("[WBoard]: Save button not bound.\n");};
 }
 
 /**

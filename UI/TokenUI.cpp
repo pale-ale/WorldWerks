@@ -12,7 +12,10 @@ TokenUI::TokenUI(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
 
 void TokenUI::set_token(Token *token) {
   displayedToken = token;
-  tokenTitle->set_text_binding(token ? &token->title : nullptr);
+  if (token) {
+    tokenTitle->set_text_binding({[token] { return token->get_title(); },
+                                  [token](auto str) { token->set_title(str); }});
+  }
 }
 
 void TokenUI::draw(sf::RenderTarget &target, sf::RenderStates states) const {
