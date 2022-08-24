@@ -10,6 +10,9 @@ class Token {
  public:
   Token(int id, sf::Vector2i pos, std::string title)
       : tokenID{id}, position{pos}, title{title} {}
+  Token() = delete;
+  Token(Token&) = delete;
+  Token(const Token&) = delete;
 
   /** @brief The position on the map in Tiled units */
   sf::Vector2i position;

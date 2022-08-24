@@ -3,17 +3,20 @@
 #include "../Math.hpp"
 
 WToken::WToken(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const Token &token)
-    : WButton(uiSystem, parent), token{token} {
+    : WButton(uiSystem, parent), token{&token} {
   setup_sprite();
 }
 
 bool WToken::is_mouse_inside(const sf::Vector2i &mousePos) {
-  float dx = mousePos.x - token.position.x;
-  float dy = mousePos.y - token.position.y;
+  float dx = mousePos.x - token->position.x;
+  float dy = mousePos.y - token->position.y;
   float distance = length({dx, dy});
   return distance <= radius;
 }
 
+/**
+ * @brief Change the color of the Widget's outline.
+ */
 void WToken::set_outline_color(sf::Color color) {
   tokenShape.setOutlineColor(color);
   rtex->draw(tokenShape);
@@ -21,6 +24,9 @@ void WToken::set_outline_color(sf::Color color) {
   sprite.setTexture(rtex->getTexture());
 }
 
+/**
+ * @brief Initialize textures and the sprite.
+ */
 void WToken::setup_sprite() {
   rtex = new sf::RenderTexture();
   if (!rtex->create(get_full_radius() * 2, get_full_radius() * 2)) {
@@ -35,7 +41,7 @@ void WToken::setup_sprite() {
   tokenShape.setPosition(borderThickness, borderThickness);
   rtex->draw(tokenShape);
   rtex->display();
-  sprite.setTexture(rtex->getTexture());
-  sprite.setPosition((float)token.position.x, (float)token.position.y);
+  sprite.setTexture(rtex->getTexture(), true);
+  sprite.setPosition((float)token->position.x, (float)token->position.y);
   sprite.setOrigin(get_full_radius(), get_full_radius());
 }

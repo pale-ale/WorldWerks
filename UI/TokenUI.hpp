@@ -6,34 +6,34 @@
 #include "Textbox.hpp"
 #include "UISystem.hpp"
 
-/* 
- Class used to display information about a token like it's name, properties,
- inventories etc. 
+/**
+ @brief Displays information about a token like it's name, properties, inventory, etc..
 */
 class TokenUI : public UIElement {
  public:
-  TokenUI(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
-          const sf::Vector2f &size);
+  TokenUI(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const sf::Vector2i &size);
 
-  /* Set the token to display information of. Set to nullptr to leave fields empty. */
-  void set_token(const Token *token);
-
-  virtual void event_position_updated() override {
-    bgSprite.setPosition(get_parent_position() + relativePosition);
-  }
+  /**
+   * @brief Set the token to display information of.
+   * Set to nullptr to leave the display empty.
+   */
+  void set_token(Token *token);
 
  protected:
   void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
  private:
   virtual void post_init() override {
-    tokenTitle = uiSystem->create_widget<Textbox>(
-        shared_from_this(), "<no token selected>", sf::Vector2f(size.x, 25));
+    tokenTitle = uiSystem->create_widget<Textbox>(shared_from_this(), nullptr,
+                                                  sf::Vector2i(size.x, 25));
   }
 
+  /** @brief The Token we are currently displaying */
   const Token *displayedToken = nullptr;
+  /** @brief The Textbox that is used to display the title */
   std::shared_ptr<Textbox> tokenTitle;
+  /** @brief The Texture containing the background, kept in memory to draw */
   sf::RenderTexture *background;
-  sf::Sprite bgSprite;
+  /** @brief The color we want our background to be */
   sf::Color bgColor = {20, 25, 30};
 };

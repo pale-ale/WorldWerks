@@ -1,7 +1,6 @@
 #include "InputManager.hpp"
 
-void InputManager::register_callback(EventFunc callback,
-                                     InputEventType filter) {
+void InputManager::register_callback(EventFunc callback, InputEventType filter) {
   switch (filter) {
     case InputEventType::KeyboardEvent:
       keyboardCallbacks.push_back(callback);
@@ -25,21 +24,14 @@ void InputManager::process_event(const sf::Event &event, const sf::Vector2i &mou
   bool bIsMouseEvent;
   switch (event.type) {
     case sf::Event::EventType::KeyPressed:
-      bIsKbEvent = true;
-      break;
     case sf::Event::EventType::KeyReleased:
+    case sf::Event::EventType::TextEntered:
       bIsKbEvent = true;
       break;
 
     case sf::Event::EventType::MouseMoved:
-      bIsMouseEvent = true;
-      break;
     case sf::Event::EventType::MouseButtonPressed:
-      bIsMouseEvent = true;
-      break;
     case sf::Event::EventType::MouseButtonReleased:
-      bIsMouseEvent = true;
-      break;
     case sf::Event::EventType::MouseWheelScrolled:
       bIsMouseEvent = true;
       break;

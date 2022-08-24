@@ -40,9 +40,8 @@ class Board {
    */
   void extract_tokens(const tmx::ObjectGroup &tokenGroup) {
     for (auto &&object : tokenGroup.objects) {
-      printf("\t Token Name: '%s'\n", object->name.c_str());
       sf::Vector2i pos{object->x, object->y};
-      tokens.push_back(Token(object->id, pos, object->name));
+      tokens.emplace_back(object->id, pos, object->name);
     }
   }
 

@@ -1,18 +1,18 @@
 #include <SFML/Graphics.hpp>
 
-#include "MapParser/MapParser.hpp"
 #include "SpriteLoader/SpriteLoader.h"
-#include "Tabletop/Board.hpp"
 #include "UI/InputManager.hpp"
 #include "UI/UISystem.hpp"
-#include "UI/WBoard.hpp"
+#include "Scene/SceneManager.hpp"
+#include "Scene/GameScene.hpp"
 
 bool RUNNING = true;
 int PIXELSCALE = 2;
-sf::Vector2f RESOLUTION(600, 350);
-sf::Vector2f WINDOW_SIZE(RESOLUTION.x* PIXELSCALE, RESOLUTION.y* PIXELSCALE);
+sf::Vector2i RESOLUTION(600, 350);
+sf::Vector2i WINDOW_SIZE(RESOLUTION.x* PIXELSCALE, RESOLUTION.y* PIXELSCALE);
 
 InputManager inputManager;
+SceneManager sceneManager;
 UISystem uiSystem(RESOLUTION);
 
 int main() {
@@ -27,11 +27,9 @@ int main() {
   windowTexture.create(WINDOW_SIZE.x, WINDOW_SIZE.y);
   sf::Event event;
 
-  tmx::MapParser mapParser;
-  mapParser.load_file("/home/alba/WorldWerksMap/ExampleMap.tmx");
-  Board board(mapParser.map);
-  uiSystem.create_widget<WBoard>(uiSystem.get_root(), &board, SpriteLoader::getInstance(),
-                                 RESOLUTION);
+  sceneManager.sceneContext.uiSystem = &uiSystem;
+  sceneManager.sceneContext.resolution = {RESOLUTION.x, RESOLUTION.y};
+  sceneManager.load_scene<GameScene>();
 
   auto cb = [](const sf::Event& event, const sf::Vector2i& mousePos) {
     uiSystem.event_callback(event, mousePos);

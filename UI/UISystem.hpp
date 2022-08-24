@@ -7,14 +7,23 @@
 #include "UIElement.hpp"
 #include "WCanvas.hpp"
 
+/**
+ * @brief TheUISystem manages the widget tree, creates/removes widgets, etc..
+ * 
+ */
 class UISystem : public sf::Drawable {
  public:
-  UISystem(sf::Vector2f viewportSize);
+  UISystem(sf::Vector2i viewportSize);
 
-  /*
-    Create a UIElement (or a class inheriting from it)
-    and add it to the widget tree to be managed by this UISystem.
-  */
+  /**
+   * @brief Create a UIElement and add it to the widget tree to be managed by this UISystem.
+   * 
+   * @tparam C The class of the widget that will be created
+   * @tparam Args Perfect forwarding of args
+   * @param parent The parent this widget will become a child of. A widget must always have a parent, unless it is the root.
+   * @param args Args that will be forwarded to C's constructor
+   * @return std::shared_ptr<C> --- The newly created widget.
+   */
   template <class C, typename... Args>
   std::shared_ptr<C> create_widget(std::shared_ptr<UIElement> parent,
                                    Args &&...args) {
@@ -27,20 +36,22 @@ class UISystem : public sf::Drawable {
     return std::dynamic_pointer_cast<C>(newWidget);
   };
 
-  /* Used to pass events into the UISystem to be distributed to the Widgets. */
   void event_callback(const sf::Event &event, const sf::Vector2i &mousePos);
 
-  /* Return the root Widget. */
+  /**
+   * @brief Get the root widget.
+   * 
+   * @return std::shared_ptr<UIElement> --- The root widget
+   */
   std::shared_ptr<UIElement> get_root() const { return root; }
 
  protected:
-  /* Draw the whole tree onto the RenderTarget. */
   void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 
  private:
-  /* The size of the Widget space. */
-  sf::Vector2f viewportSize;
+  /** @brief The size of the Widget space. */
+  sf::Vector2i viewportSize;
 
-  /* The Canvas at the base of the Widget tree. */
+  /** @brief The Canvas at the base of the Widget tree. */
   std::shared_ptr<UIElement> root = nullptr;
 };

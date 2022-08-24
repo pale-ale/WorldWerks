@@ -31,6 +31,6 @@ add_executable(main main.cpp)
 
 find_package(Catch2 2 REQUIRED)
 add_executable(tests test.cpp)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain Inventory TMXParser)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain Inventory TMXParser UI sfml-graphics sfml-system)
 
-target_link_libraries(main UI ${SpriteLoader} tinytmx::tinytmx TMXParser sfml-graphics sfml-window sfml-system)
+target_link_libraries(main UI ${SpriteLoader} TMXParser sfml-graphics sfml-window sfml-system)

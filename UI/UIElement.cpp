@@ -2,18 +2,41 @@
 
 #include "UISystem.hpp"
 
+UIElement::UIElement(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
+                     sf::Vector2i size, sf::Vector2i pos)
+    : uiSystem{uiSystem}, parent{parent}, size{size}, relativePosition{pos} {
+  auto tex = new sf::RenderTexture();
+  tex->create(size.x, size.y);
+  auto rs = sf::RectangleShape({(float)size.x, (float)size.y});
+  rs.setFillColor(sf::Color::White);
+  tex->draw(rs);
+  tex->display();
+  sprite.setTexture(tex->getTexture(), true);
+};
+
+/**
+ * @brief Adds a child to the widget tree, requires a weak_ptr to this.
+ */
 void UIElement::add_child(std::shared_ptr<UIElement> child,
-                std::weak_ptr<UIElement> parent) {
+                          std::weak_ptr<UIElement> parent) {
   children.push_back(child);
   child->parent = parent;
 }
 
+/** 
+ * @brief Allows easy custom hit-testing for this widget.
+ */
 bool UIElement::is_mouse_inside(const sf::Vector2i &mousePos) {
   int mx = mousePos.x, my = mousePos.y, px = relativePosition.x, py = relativePosition.y;
   return px <= mx && mx <= px + size.x && py <= my && my <= py + size.y;
 };
 
-const sf::Vector2f &UIElement::get_viewport_size() const {
+/**
+ * @brief Get the root widget's size, which should equal the viewport's size.
+ *
+ * @return const sf::Vector2f& --- The viewport size
+ */
+const sf::Vector2i &UIElement::get_viewport_size() const {
   auto uiElement = this;
   while (!uiElement->parent.expired()) {
     uiElement = uiElement->parent.lock().get();
@@ -21,10 +44,17 @@ const sf::Vector2f &UIElement::get_viewport_size() const {
   return uiElement->size;
 }
 
-bool UIElement::on_event_received(const sf::Event &event,
-                                  const sf::Vector2i &mousePos) {
+/**
+ * @brief Pass the event to this widget's children.
+ *
+ * @param event The event we wish to pass on to children
+ * @param mousePos The global mouse position in in-game pixels at the time of the event
+ * @return true --- The event was handled, discarding it.
+ * @return false --- The event was not handled, allowing other widgets to receive it.
+ */
+bool UIElement::on_event_received(const sf::Event &event, const sf::Vector2i &mousePos) {
   switch (event.type) {
-    case sf::Event::EventType::MouseMoved:
+    case sf::Event::MouseMoved:
       event_mouse_moved(mousePos);
       if (!bMouseOver && is_mouse_inside(mousePos)) {
         bMouseOver = true;
@@ -35,7 +65,7 @@ bool UIElement::on_event_received(const sf::Event &event,
       }
       break;
 
-    case sf::Event::EventType::MouseButtonPressed:
+    case sf::Event::MouseButtonPressed:
       if (bMouseOver && event.mouseButton.button == sf::Mouse::Button::Left) {
         /* To avoid clicking multiple buttons at once */
         for (auto &&child : children) {
@@ -49,7 +79,10 @@ bool UIElement::on_event_received(const sf::Event &event,
       }
       break;
 
-    case sf::Event::EventType::KeyPressed:
+    case sf::Event::TextEntered:
+      event_text_input(event.text.unicode);
+
+    case sf::Event::KeyPressed:
       event_key_down(event);
       break;
 
@@ -64,6 +97,12 @@ bool UIElement::on_event_received(const sf::Event &event,
   return false;
 }
 
+/**
+ * @brief Draw this widget via it's sprite onto the render target.
+ *
+ * @param target Where this widget wil be drawn
+ * @param states Contains shaders, blend functions, masks
+ */
 void UIElement::draw(sf::RenderTarget &target, sf::RenderStates states) const {
   target.draw(sprite);
   for (auto &&child : children) {
@@ -71,22 +110,33 @@ void UIElement::draw(sf::RenderTarget &target, sf::RenderStates states) const {
   }
 };
 
-const sf::Vector2f UIElement::get_parent_position() const{
-  if (parent.expired()){
-    return {0,0};
+/**
+ * @brief Get the parent's global position.
+ *
+ * @return const sf::Vector2f --- The parent's position in global coordinates
+ */
+sf::Vector2i UIElement::get_parent_position() const {
+  if (parent.expired()) {
+    return relativePosition;
   }
   auto p = parent.lock();
   return p->get_parent_position() + p->relativePosition;
 }
 
-void UIElement::update_position(const sf::Vector2f &newRelativePosition){
+/**
+ * @brief Set a new local position and re-read the parent's position
+ *
+ * @param newRelativePosition The new position relative to the parent
+ */
+void UIElement::update_position(const sf::Vector2i &newRelativePosition) {
   relativePosition = newRelativePosition;
   event_position_updated();
-  for (auto&& child : children){
+  for (auto &&child : children) {
     child->update_position();
   }
 }
 
 void UIElement::event_position_updated() {
-  sprite.setPosition(get_parent_position() + relativePosition);
+  auto pos = get_parent_position() + relativePosition;
+  sprite.setPosition({(float)pos.x, (float)pos.y});
 }

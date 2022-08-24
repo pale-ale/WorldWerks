@@ -5,7 +5,7 @@
 constexpr float clamp(float a, float x, float b) { return std::min(std::max(a, x), b); }
 
 WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent, Board* board,
-               SpriteLoader* spriteloader, const sf::Vector2f& size)
+               SpriteLoader* spriteloader, const sf::Vector2i& size)
     : UIElement(uiSystem, parent, size), board{board} {
   sf::Texture boardTexture;
   for (auto&& tileset : board->get_map()->tilesets) {
@@ -28,20 +28,43 @@ WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent, Board* boa
 void WBoard::post_init() {
   update_tokens();
   tokenUI = uiSystem->create_widget<TokenUI>(shared_from_this(),
-                                             sf::Vector2f{size.x / 4, size.y});
+                                             sf::Vector2i{size.x / 4, size.y});
   tokenUI->update_position({size.x - tokenUI->size.x, 0});
+  sf::Vector2i saveButtonSize{100,20};
+  saveButton = uiSystem->create_widget<WButton>(shared_from_this(), saveButtonSize);
+  saveButton->update_position({(size.x - saveButtonSize.x) / 2, size.y - saveButtonSize.y});
+  saveButton->buttonClickCallback = [this]{printf("Save not implemented yet.\n");};
 }
 
+/**
+ * @brief Re-create the WTokens from the data in board->tokens.
+ */
 void WBoard::update_tokens() {
   children.clear();
   for (auto&& token : board->tokens) {
     auto tokenButton = uiSystem->create_widget<WToken>(shared_from_this(), token);
-    tokenButton->buttonClickCallback = [this, token]() { display_token(&token); };
+    tokenButton->buttonClickCallback = [this, &token]() {display_token(&token); };
   }
 }
 
-void WBoard::display_token(const Token* token) { tokenUI->set_token(token); }
+/**
+ * @brief When clicked, stop displaying the selected token.
+ *
+ * @return true, because this will always handle the click event
+ */
+bool WBoard::event_clicked() {
+  display_token(nullptr);
+  return true;
+}
 
+/**
+ * @brief Set the displayed token. Set to nullptr to not display a token.
+ */
+void WBoard::display_token(Token* token) { tokenUI->set_token(token); }
+
+/**
+ * @brief Redraw the board with a new texture rect with pan and zoom applied.
+ */
 void WBoard::update_board_view() {
   int boardW = texture.getSize().x, boardH = texture.getSize().y;
   int scaledW = boardW * viewScale, scaledH = boardH * viewScale;
@@ -100,12 +123,18 @@ void WBoard::event_key_down(const sf::Event& keyEvent) {
   }
 }
 
+/**
+ * @brief Use this to pan the map up/down/left/right.
+ */
 void WBoard::change_pan(int dx, int dy) {
   desiredPan.x += dx;
   desiredPan.y += dy;
   update_board_view();
 }
 
+/**
+ * @brief Set the zoom of the map. 1 = Zoomed out. Use powers of 2, e.g. 0.25.
+ */
 void WBoard::set_scale(float newScale) {
   viewScale = clamp(minScale, newScale, maxScale);
   printf("WBoard.cpp: Scale is now %f.\n", viewScale);
