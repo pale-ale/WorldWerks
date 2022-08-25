@@ -71,11 +71,8 @@ class MapParser {
    */
   bool extract(const char *path) {
     auto root = xmlDoc.RootElement();
-    map = new Map();
-    if (!map->parse(root, path)) {
-      printf("[MapParser]: Error parsing the map node.");
-      return false;
-    }
+    map = new Map(root, path);
+    map->update_data();
     return true;
   }
 

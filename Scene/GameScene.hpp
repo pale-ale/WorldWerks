@@ -14,7 +14,7 @@ class GameScene : public SceneBase {
  public:
   GameScene(SceneContext* sceneContext) : SceneBase(sceneContext) {}
   virtual void event_load_scene() override {
-    auto load_path = "/home/alba/WorldWerksMap/ExampleMap.tmx";
+    auto load_path = "/home/alba/WorldWerksMap/Save_ExampleMap.tmx";
     auto save_path = "/home/alba/WorldWerksMap/Save_ExampleMap.tmx";
     mp = new tmx::MapParser();
     mp->load_file(load_path);

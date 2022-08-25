@@ -4,12 +4,13 @@
  * @brief Add a new callback, which is not already listening.
  *
  * @param callback --- The new callback to add.
+ * @todo Fix find_callback()
  */
 void DataChangeSource::add_callback(DataChangeCallback callback) {
-  if (find_callback(callback) != callbacks.end()) {
-    printf("[IDataChangeSource]: Callback already present. Cannot add.\n");
-    return;
-  }
+  // if (find_callback(callback) != callbacks.end()) {
+  //   printf("[IDataChangeSource]: Callback already present. Cannot add.\n");
+  //   return;
+  // }
   callbacks.push_back(callback);
 }
 
@@ -17,14 +18,17 @@ void DataChangeSource::add_callback(DataChangeCallback callback) {
  * @brief Remove a callback that is currently listening to this object.
  *
  * @param callback --- The callback to remove.
+ * @todo Fix find_callback()
  */
 void DataChangeSource::remove_callback(DataChangeCallback callback) {
-  auto test_l = find_callback(callback);
-  if (test_l == callbacks.end()) {
-    printf("[IDataChangeSource]: Callback does not exist. Cannot remove.\n");
-    return;
-  }
-  callbacks.erase(test_l);
+  printf("[DataChangeSource]: This method is not implemented!\n");
+  exit(1);
+  // auto test_l = find_callback(callback);
+  // if (test_l == callbacks.end()) {
+  //   printf("[IDataChangeSource]: Callback does not exist. Cannot remove.\n");
+  //   return;
+  // }
+  // callbacks.erase(test_l);
 }
 
 /**

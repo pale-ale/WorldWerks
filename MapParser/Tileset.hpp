@@ -2,6 +2,7 @@
 #include <filesystem>
 
 #include "../3rdParty/tinyxml2.hpp"
+#include "../Data/DataNode.hpp"
 
 using std::filesystem::canonical;
 
@@ -9,28 +10,21 @@ namespace tmx {
 /**
  * @brief Contains the tiles, dimensions, source image etc. needed to display a tile.
  */
-struct Tileset {
-  /**
-   * @brief Extract information from a .tsx tileset.
-   *
-   * @param element XML Data required to use the file
-   * @param mapPath the path to the file
-   * @return true if the file was parsed successfully, false otherwise
-   */
-  bool parse(tinyxml2::XMLElement *element, std::filesystem::path mapPath) {
+struct Tileset : public DataNode {
+  Tileset(tinyxml2::XMLElement *element, DataNode *parent, std::filesystem::path mapPath) : DataNode(element, parent), mapPath{mapPath}{}
+  virtual void commit_data() override {}
+  virtual void update_data() override {
     bool errors = false;
     errors |= (bool)element->QueryAttribute("firstgid", &firstgid);
     errors |= (bool)element->QueryAttribute("source", &relativeTilesetPath);
     if (errors) {
       printf("Errors in tileset node in the map file.\n");
-      return false;
     }
 
     auto mapFolder = mapPath.remove_filename();
     tilesetPath = canonical(mapFolder.append(std::string(relativeTilesetPath)));
     if (!std::filesystem::exists(tilesetPath)) {
       printf("Tileset path '%s' does not exist.\n", tilesetPath.c_str());
-      return false;
     }
 
     // Open the tsx that is referenced and read the tileset data.
@@ -51,8 +45,9 @@ struct Tileset {
     if (errors) {
       printf("Errors in tileset file at '%s'.\n", imagePath.c_str());
     }
-    return !errors;
   }
+
+  std::filesystem::path mapPath;
   std::string tilesetPath; /** @brief The absolute path to this tileset */
 
   // Tileset info inside the tmx

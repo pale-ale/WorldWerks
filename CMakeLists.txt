@@ -4,15 +4,16 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_library (SpriteLoader spriteloader.a /home/alba/toollib/SpriteLoader)
 find_package(tinytmx REQUIRED)
+find_package(Catch2 2 REQUIRED)
 
-add_library (Inventory
-  Data/InventoryStack.hpp
-  Data/InventoryStack.cpp
+add_library (Data
+  Data/InventoryStack.hpp Data/DataChangeSource.hpp
+  Data/InventoryStack.cpp Data/DataChangeSource.cpp
 )
 
 add_library (TMXParser
-  3rdParty/tinyxml2.hpp
-  3rdParty/tinyxml2.cpp
+  3rdParty/tinyxml2.hpp MapParser/Map.hpp
+  3rdParty/tinyxml2.cpp MapParser/Map.cpp
 )
 
 add_library (UI
@@ -21,14 +22,16 @@ add_library (UI
 )
 
 add_library (Tabletop
-  Tabletop/Board.hpp
-  Tabletop/Board.cpp
+  Tabletop/Board.hpp Tabletop/Token.hpp
+  Tabletop/Board.cpp Tabletop/Token.cpp
 )
 
 add_executable(main main.cpp)
+target_link_libraries(main UI ${SpriteLoader} TMXParser Data Tabletop sfml-graphics sfml-window sfml-system)
 
-find_package(Catch2 2 REQUIRED)
 add_executable(tests test.cpp)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain Inventory TMXParser UI sfml-graphics sfml-system)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain Data Tabletop TMXParser UI sfml-graphics sfml-system)
 
-target_link_libraries(main UI ${SpriteLoader} TMXParser Tabletop sfml-graphics sfml-window sfml-system)
+target_link_libraries(UI Tabletop)
+target_link_libraries(Tabletop Data)
+

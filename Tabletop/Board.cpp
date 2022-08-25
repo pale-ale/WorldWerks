@@ -9,10 +9,9 @@ void Board::extract_tokens(const tmx::ObjectGroup &tokenGroup) {
   for (auto &&object : tokenGroup.objects) {
     sf::Vector2i pos{object->x, object->y};
     auto &token = tokens.emplace_back(object->id, pos, object->name);
-    token.add_callback([this](auto *token) {
-      if (this->mapDataChangedCallback) {
-        (*this->mapDataChangedCallback)(token);
-      }
+    token.add_callback([&token, &object](auto *_) {
+      object->name = token.get_title();
+      object->commit_data();
     });
   }
 }

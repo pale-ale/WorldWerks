@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "../3rdParty/tinyxml2.hpp"
+#include "../Data/DataNode.hpp"
 #include "Layer.hpp"
 #include "ObjectGroup.hpp"
 #include "Tileset.hpp"
@@ -34,67 +35,40 @@ const std::map<std::string, ENodeType> NodeNameTypeMap{
 /**
  * @brief Contains Layers which themselves contain everything on the map.
  */
-struct Map {
-  /**
-   * @brief Parse an XMLElement and extract it's values.
-   * @param element The element to parse
-   * @param documentPath The path from where all relative paths start
-   * @return False if values were missing/of wrong type, true otherwise
-   */
-  bool parse(tinyxml2::XMLElement *element, const char *documentPath) {
-    bool errors = false;
-    errors |= (bool)element->QueryAttribute("width", &width);
-    errors |= (bool)element->QueryAttribute("height", &height);
-    errors |= (bool)element->QueryAttribute("tilewidth", &tilewidth);
-    errors |= (bool)element->QueryAttribute("tileheight", &tileheight);
-    errors |= (bool)element->QueryAttribute("nextlayerid", &nextlayerid);
-    errors |= (bool)element->QueryAttribute("nextobjectid", &nextobjectid);
+struct Map : public DataNode {
+  Map(XMLElement *element, const char *documentPath)
+      : DataNode(element), documentPath{documentPath} {}
+  virtual void update_data() override;
+  virtual void commit_data() override;
 
-    for (auto &&child = element->FirstChildElement(); child;
-         child = child->NextSiblingElement()) {
-      auto type = NodeNameTypeMap.find(std::string(child->Name()));
-      if (type == NodeNameTypeMap.end()) {
-        printf("Invalid type while parsing map children: %s\n", child->Name());
-        return false;
-      }
+  /** @brief The width of the map in no. of tiles */
+  int width;
 
-      switch (type->second) {
-        case ENodeType::Tileset: {
-          auto t = new Tileset();
-          if (!t->parse(child, documentPath)) {
-            printf("Error parsing tileset.\n");
-            return false;
-          }
-          tilesets.push_back(t);
-          break;
-        }
+  /** @brief The height of the map in no. of tiles */
+  int height;
 
-        case ENodeType::Layer: {
-          Layer *layer = new Layer();
-          layer->parse(child);
-          layers.push_back(layer);
-          break;
-        }
+  /** @brief The width of each tile in Tiled's units */
+  int tilewidth;
 
-        case ENodeType::ObjectGroup: {
-          ObjectGroup *group = new ObjectGroup();
-          group->parse(child);
-          objectGroups.push_back(group);
-          break;
-        }
+  /** @brief The height of each tile in Tiled's units */
+  int tileheight;
 
-        default:
-          break;
-      }
-    }
-    return !errors;
-  }
+  /** @brief Use this ID when creating new layers */
+  int nextlayerid;
 
-  int width, height;             /** @brief The size of the map in no. of tiles */
-  int tilewidth, tileheight;     /** @brief The size of each tile in Tiled's units */
-  int nextlayerid, nextobjectid; /** @brief Use this ID when creating new tiles/objects */
-  std::vector<Layer *> layers;   /** @brief Tile Layers in this map */
-  std::vector<ObjectGroup *> objectGroups; /** @brief Object Layers inthis map */
-  std::vector<Tileset *> tilesets;         /** @brief Tilesets referenced by this map */
+  /** @brief Use this ID when creating new objects */
+  int nextobjectid;
+
+  /** @brief Needed to use the relative paths provided by Tiled's map files */
+  const char *documentPath;
+
+  /** @brief Tile Layers in this map */
+  std::vector<Layer *> layers;
+
+  /** @brief Object Layers in this map */
+  std::vector<ObjectGroup *> objectGroups;
+
+  /** @brief Tilesets referenced by this map */
+  std::vector<Tileset *> tilesets;
 };
 }  // namespace tmx
