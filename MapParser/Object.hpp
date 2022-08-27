@@ -14,7 +14,7 @@ struct Object : public DataNode {
     set_attribute("id", id);
     // set_attribute("x", x);
     // set_attribute("y", y);
-    // set_attribute("name", name.c_str());
+    set_attribute("name", name.c_str());
     // set_attribute("width", width);
     // set_attribute("height", height);
     // set_attribute("gid", gid);

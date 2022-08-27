@@ -8,9 +8,9 @@ using Catch::Matchers::Equals;
 TEST_CASE("Edit TextBox", "[EditTextbox]"){
     auto ui = UISystem({0,0});
     std::string text = "text";
-    StrGetter g = [&text](){return text;};
-    StrSetter s = [&text](auto str){text = str;};
-    auto tb = ui.create_widget<Textbox>(ui.get_root(), StrBinding{g, s});
+    GetterFn<std::string> g = [&text](){return text;};
+    SetterFn<std::string> s = [&text](auto str){text = str;};
+    auto tb = ui.create_widget<Textbox>(ui.get_root(), Binding<std::string>{g, s}, sf::Vector2i{10,10}, sf::Vector2i{0,0});
     tb->event_text_input('a');
     REQUIRE_THAT(text, Equals("texta"));
     tb->event_text_input('\b');

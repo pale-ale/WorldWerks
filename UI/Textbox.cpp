@@ -1,7 +1,7 @@
 #include "Textbox.hpp"
 
 Textbox::Textbox(UISystem *uiSystem, std::shared_ptr<UIElement> parent,
-                 StrBinding binding, sf::Vector2i size, sf::Vector2i pos)
+                 Binding<string> binding, sf::Vector2i size, sf::Vector2i pos)
     : UIElement(uiSystem, parent, size, pos), binding{binding} {
   font.loadFromFile("/home/alba/projects/WorldWerks/HighOne.ttf");
   rtex = std::make_shared<sf::RenderTexture>();
@@ -14,7 +14,7 @@ Textbox::Textbox(UISystem *uiSystem, std::shared_ptr<UIElement> parent,
  *
  * @param newBinding The new binding to use.
  */
-void Textbox::set_text_binding(StrBinding newBinding) {
+void Textbox::set_text_binding(Binding<string> newBinding) {
   binding = newBinding;
   redraw();
 }

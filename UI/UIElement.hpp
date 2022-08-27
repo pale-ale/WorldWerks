@@ -23,7 +23,8 @@ class UIElement : public sf::Drawable, public std::enable_shared_from_this<UIEle
 
  public:
   void add_child(std::shared_ptr<UIElement> child, std::weak_ptr<UIElement> parent);
-  void update_position(const sf::Vector2i &newRelativePosition = {0, 0});
+  void update_position(const sf::Vector2i &newRelativePosition);
+  void update_position();
   virtual bool is_mouse_inside(const sf::Vector2i &mousePos);
   virtual bool on_event_received(const sf::Event &event, const sf::Vector2i &mousePos);
   sf::Vector2i get_parent_position() const;

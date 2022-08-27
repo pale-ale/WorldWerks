@@ -15,6 +15,8 @@ void TokenUI::set_token(Token *token) {
   if (token) {
     tokenTitle->set_text_binding({[token] { return token->get_title(); },
                                   [token](auto str) { token->set_title(str); }});
+    tokenHitpoints->set_current([token] { return 5; });
+    tokenHitpoints->set_max([token] { return 15; });
   }
 }
 

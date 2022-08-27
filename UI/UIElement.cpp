@@ -12,6 +12,7 @@ UIElement::UIElement(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
   tex->draw(rs);
   tex->display();
   sprite.setTexture(tex->getTexture(), true);
+  update_position();
 };
 
 /**
@@ -130,6 +131,16 @@ sf::Vector2i UIElement::get_parent_position() const {
  */
 void UIElement::update_position(const sf::Vector2i &newRelativePosition) {
   relativePosition = newRelativePosition;
+  event_position_updated();
+  for (auto &&child : children) {
+    child->update_position();
+  }
+}
+
+/**
+ * @brief Re-read the parent's position
+ */
+void UIElement::update_position() {
   event_position_updated();
   for (auto &&child : children) {
     child->update_position();
