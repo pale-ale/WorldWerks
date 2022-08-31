@@ -1,4 +1,5 @@
 #pragma once
+#include <functional>
 
 template <typename T>
 using GetterFn = std::function<T()>;

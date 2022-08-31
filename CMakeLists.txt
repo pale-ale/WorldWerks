@@ -17,8 +17,8 @@ add_library (TMXParser
 )
 
 add_library (UI
-  UI/WBoard.hpp UI/WToken.hpp UI/UIElement.hpp UI/TokenUI.hpp UI/InputManager.hpp UI/UISystem.hpp UI/Textbox.hpp 
-  UI/WBoard.cpp UI/WToken.cpp UI/UIElement.cpp UI/TokenUI.cpp UI/InputManager.cpp UI/UISystem.cpp UI/Textbox.cpp
+  UI/WBoard.hpp UI/WToken.hpp UI/UIElement.hpp UI/TokenUI.hpp UI/InputManager.hpp UI/UISystem.hpp UI/Textbox.hpp UI/WBar.hpp
+  UI/WBoard.cpp UI/WToken.cpp UI/UIElement.cpp UI/TokenUI.cpp UI/InputManager.cpp UI/UISystem.cpp UI/Textbox.cpp UI/WBar.cpp
 )
 
 add_library (Tabletop
@@ -26,12 +26,25 @@ add_library (Tabletop
   Tabletop/Board.cpp Tabletop/Token.cpp
 )
 
-add_executable(main main.cpp)
-target_link_libraries(main UI ${SpriteLoader} TMXParser Data Tabletop sfml-graphics sfml-window sfml-system)
+add_library (Client Net/ClientEndpoint.hpp Net/ClientEndpoint.cpp)
+
+add_library (Server Net/ServerEndpoint.hpp Net/ServerEndpoint.cpp)
+
+add_executable (client client_main.cpp)
+target_link_libraries(client ${SpriteLoader}
+  TMXParser UI 
+  Server Client
+  Tabletop Data
+  sfml-graphics sfml-window sfml-system 
+)
+
+add_executable (server server_main.cpp)
+target_link_libraries(server Server)
 
 add_executable(tests test.cpp)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain Data Tabletop TMXParser UI sfml-graphics sfml-system)
-
-target_link_libraries(UI Tabletop)
-target_link_libraries(Tabletop Data)
-
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain
+  TMXParser UI 
+  Server Client
+  Tabletop Data
+  sfml-graphics sfml-window sfml-system
+)
