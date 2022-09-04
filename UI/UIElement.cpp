@@ -16,7 +16,10 @@ UIElement::UIElement(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
 };
 
 /**
- * @brief Adds a child to the widget tree, requires a weak_ptr to this.
+ * @brief Adds a child to the widget tree.
+ * 
+ * @param child The child to add.
+ * @param parent Who this child will be the child of, i.e. who it inherits the positoin and events from.
  */
 void UIElement::add_child(std::shared_ptr<UIElement> child,
                           std::weak_ptr<UIElement> parent) {
@@ -24,8 +27,12 @@ void UIElement::add_child(std::shared_ptr<UIElement> child,
   child->parent = parent;
 }
 
-/** 
+/**
  * @brief Allows easy custom hit-testing for this widget.
+ * 
+ * @param mousePos The position of the mouse in pixel coordiantes.
+ * @return true if the mouse is inside,
+ * @return false otherwise.
  */
 bool UIElement::is_mouse_inside(const sf::Vector2i &mousePos) {
   int mx = mousePos.x, my = mousePos.y, px = relativePosition.x, py = relativePosition.y;
@@ -62,6 +69,7 @@ bool UIElement::on_event_received(const sf::Event &event, const sf::Vector2i &mo
         event_begin_mouse_over();
       } else if (bMouseOver && !is_mouse_inside(mousePos)) {
         bMouseOver = false;
+        bContinuouslyPressed = false;
         event_end_mouse_over();
       }
       break;
@@ -74,7 +82,25 @@ bool UIElement::on_event_received(const sf::Event &event, const sf::Vector2i &mo
             return true;
           }
         }
-        if (event_clicked()) {
+        bContinuouslyPressed = true;
+        if (event_mouse_down()) {
+          return true;
+        }
+      }
+      break;
+
+    case sf::Event::MouseButtonReleased:
+      if (bMouseOver && event.mouseButton.button == sf::Mouse::Button::Left) {
+        // To avoid triggering multiple releases at once
+        for (auto &&child : children) {
+          if (child->on_event_received(event, mousePos)) {
+            return true;
+          }
+        }
+        if (bContinuouslyPressed && event_clicked()) {
+          return true;
+        }
+        if (event_mouse_up()) {
           return true;
         }
       }

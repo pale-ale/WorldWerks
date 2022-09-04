@@ -45,3 +45,10 @@ void WToken::setup_sprite() {
   sprite.setPosition((float)token->get_position().x, (float)token->get_position().y);
   sprite.setOrigin(get_full_radius(), get_full_radius());
 }
+
+void WToken::draw(sf::RenderTarget &target, sf::RenderStates states) const {
+  WButton::draw(target, states);
+  if (line) {
+    target.draw(*line);
+  }
+}
