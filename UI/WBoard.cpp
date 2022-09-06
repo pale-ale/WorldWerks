@@ -30,10 +30,13 @@ void WBoard::post_init() {
   tokenUI = uiSystem->create_widget<TokenUI>(shared_from_this(),
                                              sf::Vector2i{size.x / 4, size.y});
   tokenUI->update_position({size.x - tokenUI->size.x, 0});
-  sf::Vector2i saveButtonSize{100,20};
+  sf::Vector2i saveButtonSize{100, 20};
   saveButton = uiSystem->create_widget<WButton>(shared_from_this(), saveButtonSize);
-  saveButton->update_position({(size.x - saveButtonSize.x) / 2, size.y - saveButtonSize.y});
-  saveButton->buttonClickCallback = [this]{printf("[WBoard]: Save button not bound.\n");};
+  saveButton->update_position(
+      {(size.x - saveButtonSize.x) / 2, size.y - saveButtonSize.y});
+  saveButton->buttonClickCallback = [this] {
+    printf("[WBoard]: Save button not bound.\n");
+  };
 }
 
 /**
@@ -42,8 +45,10 @@ void WBoard::post_init() {
 void WBoard::update_tokens() {
   children.clear();
   for (auto&& token : board->tokens) {
-    auto tokenButton = uiSystem->create_widget<WToken>(shared_from_this(), token);
-    tokenButton->buttonClickCallback = [this, &token]() {display_token(&token); };
+    auto positionSetter = [&token](const sf::Vector2i &v){token.set_position(v);};
+    Binding<sf::Vector2i> binding{{}, positionSetter};
+    auto tokenButton = uiSystem->create_widget<WToken>(shared_from_this(), token, binding);
+    tokenButton->buttonClickCallback = [this, &token]() { display_token(&token); };
   }
 }
 
@@ -53,6 +58,7 @@ void WBoard::update_tokens() {
  * @return true, because this will always handle the click event
  */
 bool WBoard::event_clicked() {
+  printf("[WBoard]: Hiding TokenUI.\n");
   display_token(nullptr);
   return true;
 }
@@ -60,7 +66,10 @@ bool WBoard::event_clicked() {
 /**
  * @brief Set the displayed token. Set to nullptr to not display a token.
  */
-void WBoard::display_token(Token* token) { tokenUI->set_token(token); }
+void WBoard::display_token(Token* token) {
+  printf("[WBoard]: Displaying token '%s'.\n", token ? token->get_title().c_str() : "null");
+  tokenUI->set_token(token);
+}
 
 /**
  * @brief Redraw the board with a new texture rect with pan and zoom applied.

@@ -11,6 +11,8 @@ void Board::extract_tokens(const tmx::ObjectGroup &tokenGroup) {
     auto &token = tokens.emplace_back(object->id, pos, object->name);
     token.add_callback([&token, &object](auto *_) {
       object->name = token.get_title();
+      object->x = token.get_position().x;
+      object->y = token.get_position().y;
       object->commit_data();
     });
   }

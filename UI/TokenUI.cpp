@@ -11,6 +11,11 @@ TokenUI::TokenUI(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
 }
 
 void TokenUI::set_token(Token *token) {
+  if (displayedToken == token){
+    printf("[TokenUI]: Token already displayed. Nothing to do.\n");
+    return;
+  }
+  printf("[TokenUI]: Set token.\n");
   displayedToken = token;
   if (token) {
     tokenTitle->set_text_binding({[token] { return token->get_title(); },

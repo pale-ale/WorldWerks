@@ -2,14 +2,16 @@
 
 #include "../Math.hpp"
 
-WToken::WToken(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const Token &token)
-    : WButton(uiSystem, parent), token{&token} {
+WToken::WToken(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const Token &token,
+               Binding<sf::Vector2i> moveBinding)
+    : WButton(uiSystem, parent), token{&token}, moveBinding{moveBinding} {
   setup_sprite();
 }
 
 bool WToken::is_mouse_inside(const sf::Vector2i &mousePos) {
-  float dx = mousePos.x - token->get_position().x;
-  float dy = mousePos.y - token->get_position().y;
+  auto &pos = sprite.getPosition();
+  float dx = mousePos.x - pos.x;
+  float dy = mousePos.y - pos.y;
   float distance = length({dx, dy});
   return distance <= radius;
 }
@@ -51,4 +53,28 @@ void WToken::draw(sf::RenderTarget &target, sf::RenderStates states) const {
   if (line) {
     target.draw(*line);
   }
+}
+
+bool WToken::event_mouse_down() {
+  bBeingDragged = true;
+  return true;
+}
+
+void WToken::event_mouse_moved(const sf::Vector2i &mousePos) {
+  if (bBeingDragged) {
+    auto parentPos = get_parent_position();
+    auto relativePos = mousePos - parentPos;
+    update_position(relativePos);
+  }
+}
+
+bool WToken::event_mouse_up() {
+  if (bBeingDragged) {
+    bBeingDragged = false;
+    if (moveBinding.set) {
+      moveBinding.set(get_parent_position() + relativePosition);
+    }
+    return true;
+  }
+  return false;
 }

@@ -90,17 +90,14 @@ bool UIElement::on_event_received(const sf::Event &event, const sf::Vector2i &mo
       break;
 
     case sf::Event::MouseButtonReleased:
-      if (bMouseOver && event.mouseButton.button == sf::Mouse::Button::Left) {
+      if (event.mouseButton.button == sf::Mouse::Button::Left) {
         // To avoid triggering multiple releases at once
         for (auto &&child : children) {
           if (child->on_event_received(event, mousePos)) {
             return true;
           }
         }
-        if (bContinuouslyPressed && event_clicked()) {
-          return true;
-        }
-        if (event_mouse_up()) {
+        if (event_mouse_up() | (bContinuouslyPressed && event_clicked())) {
           return true;
         }
       }

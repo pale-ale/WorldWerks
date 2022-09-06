@@ -12,8 +12,8 @@ struct Object : public DataNode {
   Object(XMLElement * element, DataNode *parent) : DataNode(element, parent){}
   virtual void commit_data() override {
     set_attribute("id", id);
-    // set_attribute("x", x);
-    // set_attribute("y", y);
+    set_attribute("x", x);
+    set_attribute("y", y);
     set_attribute("name", name.c_str());
     // set_attribute("width", width);
     // set_attribute("height", height);
