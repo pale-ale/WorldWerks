@@ -1,6 +1,7 @@
 #pragma once
 
 class MapParser;
+class ClientEndpoint;
 
 /**
  * @brief Contains data that can be useful for scenes.
@@ -11,6 +12,7 @@ struct SceneContext {
   struct vec {
     int x;
     int y;
+    operator sf::Vector2f(){return {(float)x, (float)y};}
   };
 
  public:
@@ -20,4 +22,6 @@ struct SceneContext {
   MapParser* mapParser = nullptr;
   /** @brief Needed to create new UIElements */
   UISystem* uiSystem = nullptr;
+  /** @brief Allows connecting/disconnecting */
+  ClientEndpoint *clientEp = nullptr;
 };

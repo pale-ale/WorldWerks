@@ -12,7 +12,7 @@
  */
 class GameScene : public SceneBase {
  public:
-  GameScene(SceneContext* sceneContext) : SceneBase(sceneContext) {}
+  GameScene(SceneManager *sm, SceneContext* sceneContext) : SceneBase(sm, sceneContext) {}
   virtual void event_load_scene() override {
     auto load_path = "/home/alba/WorldWerksMap/Save_ExampleMap.tmx";
     auto save_path = "/home/alba/WorldWerksMap/Save_ExampleMap.tmx";

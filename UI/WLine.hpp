@@ -1,5 +1,5 @@
 #pragma once
-#include "../Math.hpp"
+#include "../Util/Math.hpp"
 #include "SFML/Graphics.hpp"
 
 /**

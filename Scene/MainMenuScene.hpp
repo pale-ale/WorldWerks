@@ -2,6 +2,8 @@
 #include <stdio.h>
 
 #include "SceneBase.hpp"
+#include "GameScene.hpp"
+#include <string>
 
 /**
  * @brief The scene shown at the game's startup.
@@ -9,6 +11,23 @@
  */
 class MainMenuScene : public SceneBase {
  public:
-  MainMenuScene(SceneContext* sceneContext) : SceneBase(sceneContext) {}
-  virtual void event_load_scene() override { printf("[MainMenuScene]: Loaded.\n"); }
+  MainMenuScene(SceneManager *sm, SceneContext* sceneContext);
+  virtual void event_load_scene() override;
+
+ protected:
+  virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
+    target.draw(bgShape);
+    target.draw(*sceneContext->uiSystem, states);
+  };
+
+ private:
+  void event_join_clicked();
+
+
+  sf::RectangleShape bgShape;
+  std::shared_ptr<WTextbox> ipTb;
+  std::shared_ptr<WTextbox> portTb;
+  std::shared_ptr<WButton> joinBtn;
+  std::string ip = "127.0.0.1";
+  std::string port = "12345";
 };

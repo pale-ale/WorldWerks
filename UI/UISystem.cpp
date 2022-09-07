@@ -2,6 +2,7 @@
 
 UISystem::UISystem(sf::Vector2i viewportSize) : viewportSize{viewportSize} {
   root = create_widget<Canvas>(nullptr);
+  root->sprite.setColor(sf::Color::Transparent);
   root->size = viewportSize;
   printf("Root: %p\n", root.get());
 }

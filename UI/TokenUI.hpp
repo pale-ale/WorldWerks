@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "../Tabletop/Token.hpp"
-#include "Textbox.hpp"
+#include "WTextbox.hpp"
 #include "UISystem.hpp"
 #include "WBar.hpp"
 
@@ -32,7 +32,7 @@ class TokenUI : public UIElement {
     sf::Vector2i titleSize(width, 25);
     sf::Vector2i hpPos(loffset, titlePos.y + titleSize.y);
     sf::Vector2i hpSize(width, 10);
-    tokenTitle = uiSystem->create_widget<Textbox>(
+    tokenTitle = uiSystem->create_widget<WTextbox>(
         shared_from_this(), Binding<std::string>(), titleSize, titlePos);
     tokenHitpoints = uiSystem->create_widget<WBar>(
         shared_from_this(), GetterFn<int>(), GetterFn<int>(), sf::Color{255,0,0},
@@ -42,8 +42,8 @@ class TokenUI : public UIElement {
   /** @brief The Token we are currently displaying */
   const Token *displayedToken = nullptr;
 
-  /** @brief The Textbox that is used to display the title */
-  std::shared_ptr<Textbox> tokenTitle;
+  /** @brief The WTextbox that is used to display the title */
+  std::shared_ptr<WTextbox> tokenTitle;
 
   /** @brief The hit points this token has left */
   std::shared_ptr<WBar> tokenHitpoints;

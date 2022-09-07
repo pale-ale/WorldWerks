@@ -11,9 +11,9 @@ using std::string;
 /**
  * @brief Displays some text in a rectangle with a background.
  */
-class Textbox : public UIElement {
+class WTextbox : public UIElement {
  public:
-  Textbox(UISystem *uiSystem, std::shared_ptr<UIElement> parent, Binding<string> binding,
+  WTextbox(UISystem *uiSystem, std::shared_ptr<UIElement> parent, Binding<string> binding,
           sf::Vector2i size, sf::Vector2i pos);
   void redraw();
   void set_text_binding(Binding<string> newBinding);

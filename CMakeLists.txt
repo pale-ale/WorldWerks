@@ -17,8 +17,8 @@ add_library (TMXParser
 )
 
 add_library (UI
-  UI/WBoard.hpp UI/WToken.hpp UI/UIElement.hpp UI/TokenUI.hpp UI/InputManager.hpp UI/UISystem.hpp UI/Textbox.hpp UI/WBar.hpp
-  UI/WBoard.cpp UI/WToken.cpp UI/UIElement.cpp UI/TokenUI.cpp UI/InputManager.cpp UI/UISystem.cpp UI/Textbox.cpp UI/WBar.cpp
+  UI/WBoard.hpp UI/WToken.hpp UI/UIElement.hpp UI/TokenUI.hpp UI/InputManager.hpp UI/UISystem.hpp UI/WTextbox.hpp UI/WBar.hpp
+  UI/WBoard.cpp UI/WToken.cpp UI/UIElement.cpp UI/TokenUI.cpp UI/InputManager.cpp UI/UISystem.cpp UI/WTextbox.cpp UI/WBar.cpp
 )
 
 add_library (Tabletop
@@ -30,8 +30,12 @@ add_library (Client Net/ClientEndpoint.hpp Net/ClientEndpoint.cpp)
 
 add_library (Server Net/ServerEndpoint.hpp Net/ServerEndpoint.cpp)
 
+add_library (Scene Scene/MainMenuScene.hpp Scene/MainMenuScene.cpp)
+
 add_executable (client client_main.cpp)
-target_link_libraries(client ${SpriteLoader}
+target_link_libraries(client 
+  Scene
+  ${SpriteLoader}
   TMXParser UI 
   Server Client
   Tabletop Data

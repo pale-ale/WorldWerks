@@ -29,7 +29,7 @@ int main() {
 
   sceneManager.sceneContext.uiSystem = &uiSystem;
   sceneManager.sceneContext.resolution = {RESOLUTION.x, RESOLUTION.y};
-  sceneManager.load_scene<GameScene>();
+  sceneManager.load_scene<MainMenuScene>();
 
   auto cb = [](const sf::Event& event, const sf::Vector2i& mousePos) {
     uiSystem.event_callback(event, mousePos);
@@ -47,7 +47,7 @@ int main() {
       auto mp = window.mapPixelToCoords(pixelPos);
       inputManager.process_event(event, {(int)mp.x, (int)mp.y});
     }
-    windowTexture.draw(uiSystem);
+    windowTexture.draw(sceneManager);
     windowTexture.display();
     windowSprite.setTexture(windowTexture.getTexture());
     window.draw(windowSprite);

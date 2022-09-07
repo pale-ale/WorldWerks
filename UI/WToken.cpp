@@ -1,6 +1,6 @@
 #include "WToken.hpp"
 
-#include "../Math.hpp"
+#include "../Util/Math.hpp"
 
 WToken::WToken(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const Token &token,
                Binding<sf::Vector2i> moveBinding)
