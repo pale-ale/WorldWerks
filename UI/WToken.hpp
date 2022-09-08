@@ -33,9 +33,9 @@ class WToken : public WButton {
   void setup_sprite();
   void set_outline_color(sf::Color color);
 
-  virtual bool event_mouse_down() override;
+  virtual bool event_mouse_down(const sf::Vector2i &mousePos) override;
   virtual void event_mouse_moved(const sf::Vector2i &mousePos) override;
-  virtual bool event_mouse_up() override;
+  virtual bool event_mouse_up(const sf::Vector2i &mousePos) override;
 
   /**
    * @brief Get the full radius of the token, including the outline.

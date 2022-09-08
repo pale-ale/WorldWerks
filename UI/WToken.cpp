@@ -55,9 +55,12 @@ void WToken::draw(sf::RenderTarget &target, sf::RenderStates states) const {
   }
 }
 
-bool WToken::event_mouse_down() {
-  bBeingDragged = true;
-  return true;
+bool WToken::event_mouse_down(const sf::Vector2i &mousePos) {
+  if (is_mouse_inside(mousePos)) {
+    bBeingDragged = true;
+    return true;
+  }
+  return false;
 }
 
 void WToken::event_mouse_moved(const sf::Vector2i &mousePos) {
@@ -68,7 +71,7 @@ void WToken::event_mouse_moved(const sf::Vector2i &mousePos) {
   }
 }
 
-bool WToken::event_mouse_up() {
+bool WToken::event_mouse_up(const sf::Vector2i &mousePos) {
   if (bBeingDragged) {
     bBeingDragged = false;
     if (moveBinding.set) {

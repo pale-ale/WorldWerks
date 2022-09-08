@@ -17,9 +17,10 @@ UIElement::UIElement(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
 
 /**
  * @brief Adds a child to the widget tree.
- * 
+ *
  * @param child The child to add.
- * @param parent Who this child will be the child of, i.e. who it inherits the positoin and events from.
+ * @param parent Who this child will be the child of, i.e. who it inherits the positoin
+ * and events from.
  */
 void UIElement::add_child(std::shared_ptr<UIElement> child,
                           std::weak_ptr<UIElement> parent) {
@@ -29,7 +30,7 @@ void UIElement::add_child(std::shared_ptr<UIElement> child,
 
 /**
  * @brief Allows easy custom hit-testing for this widget.
- * 
+ *
  * @param mousePos The position of the mouse in pixel coordiantes.
  * @return true if the mouse is inside,
  * @return false otherwise.
@@ -75,15 +76,17 @@ bool UIElement::on_event_received(const sf::Event &event, const sf::Vector2i &mo
       break;
 
     case sf::Event::MouseButtonPressed:
-      if (bMouseOver && event.mouseButton.button == sf::Mouse::Button::Left) {
+      if (event.mouseButton.button == sf::Mouse::Button::Left) {
         /* To avoid clicking multiple buttons at once */
         for (auto &&child : children) {
           if (child->on_event_received(event, mousePos)) {
             return true;
           }
         }
-        bContinuouslyPressed = true;
-        if (event_mouse_down()) {
+        if (bMouseOver) {
+          bContinuouslyPressed = true;
+        }
+        if (event_mouse_down(mousePos)) {
           return true;
         }
       }
@@ -97,9 +100,18 @@ bool UIElement::on_event_received(const sf::Event &event, const sf::Vector2i &mo
             return true;
           }
         }
-        if (event_mouse_up() | (bContinuouslyPressed && event_clicked())) {
-          return true;
+
+        bool handled = false;
+        if (bMouseOver) {
+          if (bContinuouslyPressed) {
+            bContinuouslyPressed = false;
+            handled = event_clicked();
+          }
+        } else {
+          bContinuouslyPressed = false;
         }
+
+        return handled | event_mouse_up(mousePos) | (bContinuouslyPressed && event_clicked());
       }
       break;
 

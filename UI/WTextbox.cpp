@@ -32,7 +32,7 @@ void WTextbox::redraw() {
 }
 
 void WTextbox::event_text_input(const char &input) {
-  if (binding.get && binding.set) {
+  if (bIsFocused && binding.get && binding.set) {
     auto str = binding.get();
     if (input == '\b') {
       if (str.length() > 0) str.pop_back();

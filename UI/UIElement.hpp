@@ -56,11 +56,11 @@ class UIElement : public sf::Drawable, public std::enable_shared_from_this<UIEle
   /** @brief Called when the mouse clicked on this widget. */
   virtual bool event_clicked() { return false; }
 
-  /** @brief Called when the left mouse button is pressed while over this widget. */
-  virtual bool event_mouse_down() { return false; }
+  /** @brief Called when the left mouse button is pressed anywhere. */
+  virtual bool event_mouse_down(const sf::Vector2i &mousePos) { return false; }
 
-  /** @brief Called when the left mouse button is released while over this widget. */
-  virtual bool event_mouse_up() { return false; }
+  /** @brief Called when the left mouse button is released anywhere. */
+  virtual bool event_mouse_up(const sf::Vector2i &mousePos) { return false; }
 
   /** @brief Called whene the mouse moved anywhere. */
   virtual void event_mouse_moved(const sf::Vector2i &mousePos) {}
@@ -79,7 +79,7 @@ class UIElement : public sf::Drawable, public std::enable_shared_from_this<UIEle
 
   /** @brief True if the mouse is currently inside this widget. */
   bool bMouseOver = false;
-  
+
   /** @brief True if LMB was pressed over this widget and mouse did not leave. */
   bool bContinuouslyPressed = false;
 
