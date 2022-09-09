@@ -65,49 +65,22 @@ bool ClientEndpoint::is_connected_and_buffer_empty() {
 }
 
 /**
- * @brief Check if the socket was created and is not terminated.
- * Does not detect quiet disconnects.
+ * @brief Send data to the server.
  *
- * @return true --- The socket is up.
- * @return false --- Socket is not connected / was sut down.
+ * @param msgType The message type, i.e. if a player joins, edits a token, etc.
+ * @param data The data to send.
  */
-bool ClientEndpoint::is_socket_up() {
-  int error = 0;
-  socklen_t len = sizeof(error);
-  int retval = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &error, &len);
-  int result = error | retval;
-  if (result != 0) {
-    printf("[Client]: Non-Zero socket connection status: %d (error) | %d (status)\n",
-           error, retval);
-  }
-  return (error | retval) == 0;
+void ClientEndpoint::send_data(wwnet::EMessageType msgType, const char* data) {
+  wwnet::send_data(socketFd, msgType, data, "Client");
 }
 
 /**
- * @brief Push some data towards the server.
- *
- * @param data Strings we want to send to the server.
+ * @brief Read data from the server.
+ * 
+ * @return std::pair<wwnet::EMessageType, std::string> --- The message type and the contents.
  */
-void ClientEndpoint::send_data(const char* data) {
-  send(socketFd, data, strlen(data), 0);
-  printf("[Client]: SND: '%s'.\n", data);
-}
-
-/**
- * @brief Fetch data sent by the server to our connection.
- *
- * @return std::string --- The data received.
- */
-std::string ClientEndpoint::rcv_data() {
-  int readBytes = 1;
-  std::string text = "";
-  while (readBytes > 0) {
-    readBytes = read(socketFd, buffer, 1024);
-    text += buffer;
-    buffer[0] = '\0';
-  }
-  printf("[Client]: RCV: '%s'.\n", text.c_str());
-  return text;
+std::pair<wwnet::EMessageType, std::string> ClientEndpoint::rcv_data() {
+  return wwnet::rcv_data(socketFd, buffer, bufferSize, "Client");
 }
 
 /**

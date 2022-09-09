@@ -17,16 +17,20 @@ TEST_CASE("Connect server and client", "[NetSC]"){
     REQUIRE(client.is_connected_and_buffer_empty());
 
     // Server -> Client
-    server.send_single(pc.clientFd, "Hello!");
-    auto clientText = client.rcv_data();
-    REQUIRE_THAT(clientText, Equals("Hello!"));
+    auto ptx = wwnet::EMessageType::PLAINTXT;
+    server.send_single(pc.clientFd, ptx, "Hello, Client!");
+    auto [clientType, clientText] = client.rcv_data();
+    REQUIRE(clientType == ptx);
+    REQUIRE_THAT(clientText, Equals("Hello, Client!"));
 
     // Client -> Server
-    client.send_data("Hello ");
-    client.send_data("from ");
-    client.send_data("the ");
-    client.send_data("otter ");
-    client.send_data("side! äöü\t-@");
-    auto serverText = server.rcv_single(pc.clientFd);
-    REQUIRE_THAT(serverText, Equals("Hello from the otter side! äöü\t-@"));
+    client.send_data(ptx, "Hello, Server!");
+    client.send_data(ptx, "Second message");
+    auto [serverType, serverText] = server.rcv_single(pc.clientFd);
+    REQUIRE(serverType == ptx);
+    REQUIRE_THAT(serverText, Equals("Hello, Server!"));
+    
+    auto [serverType2, serverText2] = server.rcv_single(pc.clientFd);
+    REQUIRE(serverType2 == ptx);
+    REQUIRE_THAT(serverText2, Equals("Second message"));
 }

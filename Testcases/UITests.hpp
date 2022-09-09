@@ -11,6 +11,7 @@ TEST_CASE("Edit TextBox", "[EditTextbox]"){
     GetterFn<std::string> g = [&text](){return text;};
     SetterFn<std::string> s = [&text](auto str){text = str;};
     auto tb = ui.create_widget<WTextbox>(ui.get_root(), Binding<std::string>{g, s}, sf::Vector2i{10,10}, sf::Vector2i{0,0});
+    tb->event_clicked();
     tb->event_text_input('a');
     REQUIRE_THAT(text, Equals("texta"));
     tb->event_text_input('\b');

@@ -42,7 +42,7 @@ void MainMenuScene::event_join_clicked() {
   auto ep = new ClientEndpoint();
   ep->start_connecting(ip.c_str(), std::stoi(port));
   sceneContext->clientEp = ep;
-  if (ep->is_socket_up() && ep->is_connected_and_buffer_empty()) {
+  if (ep->is_up() && ep->is_connected_and_buffer_empty()) {
     printf("[MainMenuScene]: Connected successfully.\n");
     sceneManager->load_scene<GameScene>();
   }

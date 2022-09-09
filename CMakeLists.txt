@@ -26,31 +26,47 @@ add_library (Tabletop
   Tabletop/Board.cpp Tabletop/Token.cpp
 )
 
-add_library (Client Net/ClientEndpoint.hpp Net/ClientEndpoint.cpp)
+add_library (Client
+  Net/ClientEndpoint.hpp Net/SendReceive.hpp
+  Net/ClientEndpoint.cpp Net/SendReceive.cpp
+)
 
-add_library (Server Net/ServerEndpoint.hpp Net/ServerEndpoint.cpp)
+add_library (Server 
+  Net/ServerEndpoint.hpp Net/SendReceive.hpp 
+  Net/ServerEndpoint.cpp Net/SendReceive.cpp
+)
 
-add_library (Scene Scene/MainMenuScene.hpp Scene/MainMenuScene.cpp)
+add_library (Scene 
+  Scene/MainMenuScene.hpp 
+  Scene/MainMenuScene.cpp
+)
+
+add_library (Util 
+  Util/Util.hpp
+  Util/Util.cpp
+)
 
 add_executable (client client_main.cpp)
 target_link_libraries(client 
   Scene
   ${SpriteLoader}
   TMXParser UI 
-  Server Client
-  Tabletop Data
+  Server Client 
+  Util Tabletop Data
   sfml-graphics sfml-window sfml-system 
 )
 
 add_executable (server server_main.cpp)
-target_link_libraries(server Server 
+target_link_libraries(server 
   TMXParser
+  Server 
+  Util
 )
 
 add_executable(tests test.cpp)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain
-  TMXParser UI 
+  Util TMXParser UI 
   Server Client
-  Tabletop Data
+  Util Tabletop Data
   sfml-graphics sfml-window sfml-system
 )

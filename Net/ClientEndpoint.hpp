@@ -1,9 +1,12 @@
 #pragma once
 #include <string>
 
+#include "Proto/Protocol.hpp"
+#include "SendReceive.hpp"
+
 /**
  * @brief The client side of the connection.
- * 
+ *
  */
 class ClientEndpoint {
  private:
@@ -15,8 +18,8 @@ class ClientEndpoint {
   ClientEndpoint();
   void start_connecting(const char* ipv4, int port);
   bool is_connected_and_buffer_empty();
-  bool is_socket_up();
-  void send_data(const char* data);
-  std::string rcv_data();
+  bool is_up() { return wwnet::is_socket_up(socketFd); }
+  void send_data(wwnet::EMessageType msgType, const char* data);
+  std::pair<wwnet::EMessageType, std::string> rcv_data();
   void quit();
 };
