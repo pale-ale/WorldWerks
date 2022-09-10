@@ -57,9 +57,18 @@ int main(int argc, char* argv[]) {
       break;
     }
   }
+  printf("[Server]: Loaded map.\n");
+  serverEp.callbacks[wwnet::EMessageType::REQ_MAP].push_back([](int clientFd,
+                                                                std::string _) {
+    serverEp.send_single(clientFd, wwnet::RES_MAP, mp.data.c_str());
+  });
 
   for (int i = 0; i < 10; i++) {
-    serverEp.accept_connection();
+    auto conn = serverEp.accept_connection();
+    if (conn.clientFd != -1) {
+      serverEp.connections.push_back(conn);
+    }
+    serverEp.digest_incoming();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 }

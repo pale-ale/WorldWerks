@@ -3,11 +3,14 @@
 
 namespace wwnet{
   enum EMessageType : std::int8_t{
-    BROKEN,
-    REQ_JOIN,
-    RES_JOIN,
-    PLAINTXT,
-
+    // REQ = request, RES = respones
+    NONE,       // Message does not exist
+    BROKEN,     // Broken packet, unreadable message type
+    REQ_JOIN,   // Client requests to join the session
+    RES_JOIN,   // Server responds with accept/decline
+    PLAINTXT,   // Plain text
+    REQ_MAP,    // Client requests the whole map
+    RES_MAP,    // Server responds with the map data
   };
 
   // TODO

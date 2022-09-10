@@ -3,6 +3,7 @@
 
 #include "../3rdParty/tinyxml2.hpp"
 #include "Map.hpp"
+#include <fstream>
 
 namespace tmx {
 
@@ -18,6 +19,11 @@ class MapParser {
    * @return true if loading/parsing of the file was succesful, false otherwise
    */
   bool load_file(const std::string &path) {
+    std::ifstream is(path);
+    std::stringstream buffer;
+    buffer << is.rdbuf();
+    data = buffer.str();
+    
     auto err = xmlDoc.LoadFile(path.c_str());
     if (err != tinyxml2::XMLError::XML_SUCCESS) {
       printf("[MapParser]: Error reading XML Document: \n%s\n", xmlDoc.ErrorStr());
@@ -34,6 +40,7 @@ class MapParser {
    * @return true if loading/parsing of the string was succesful, false otherwise
    */
   bool load_text(const std::string &text, const char *mapPath = "") {
+    data = text;
     auto err = xmlDoc.Parse(text.c_str());
     if (err != tinyxml2::XMLError::XML_SUCCESS) {
       printf("[MapParser]: Error reading XML Document: \n%s\n", xmlDoc.ErrorStr());
@@ -61,6 +68,8 @@ class MapParser {
 
   /** @brief Access the loaded tmx::Map after it's been parsed */
   tmx::Map *map = nullptr;
+
+  std::string data;
 
  private:
   /**

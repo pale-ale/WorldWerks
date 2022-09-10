@@ -2,6 +2,8 @@
 
 #include <netinet/in.h>
 
+#include <functional>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -21,13 +23,18 @@ struct PlayerConnection {
  *
  */
 class ServerEndpoint {
+ private:
+  typedef std::function<void(int, std::string)> EventFunc;
+
  public:
+  std::map<wwnet::EMessageType, std::vector<EventFunc>> callbacks;
   std::vector<PlayerConnection> connections;
   struct sockaddr_in address;
   ServerEndpoint(const char* ipv4, int port);
   PlayerConnection accept_connection();
   void send_single(int clientFd, wwnet::EMessageType msgType, const char* data);
   void send_all(wwnet::EMessageType msgType, const char* data);
+  void digest_incoming();
   std::pair<wwnet::EMessageType, std::string> rcv_single(int clientFd);
 
  private:

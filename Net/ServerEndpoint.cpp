@@ -107,3 +107,16 @@ void ServerEndpoint::send_all(wwnet::EMessageType msgType, const char *data) {
 std::pair<wwnet::EMessageType, std::string> ServerEndpoint::rcv_single(int clientFd) {
   return wwnet::rcv_data(clientFd, buffer, 1024, "Server");
 }
+
+/**
+ * @brief Process a single incoming message on each connection. 
+ *
+ */
+void ServerEndpoint::digest_incoming() {
+  for (auto &&connection : connections) {
+    auto [msgType, msgData] = rcv_single(connection.clientFd);
+    for (auto &&cb : callbacks[msgType]) {
+      cb(connection.clientFd, msgData);
+    }
+  }
+}

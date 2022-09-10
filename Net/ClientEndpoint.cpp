@@ -76,11 +76,38 @@ void ClientEndpoint::send_data(wwnet::EMessageType msgType, const char* data) {
 
 /**
  * @brief Read data from the server.
- * 
- * @return std::pair<wwnet::EMessageType, std::string> --- The message type and the contents.
+ *
+ * @return std::pair<wwnet::EMessageType, std::string> --- The message type and the
+ * contents.
  */
 std::pair<wwnet::EMessageType, std::string> ClientEndpoint::rcv_data() {
   return wwnet::rcv_data(socketFd, buffer, bufferSize, "Client");
+}
+
+/**
+ * @brief Request the whole map from the server as XML data.
+ * Use receive_map() to try and read the server's response.
+ *
+ * @return true: Request successful.
+ * @return false: Request failed.
+ */
+bool ClientEndpoint::request_map() {
+  send_data(wwnet::EMessageType::REQ_MAP, "");
+  return true;
+}
+
+/**
+ * @brief Process incoming messages form the server.
+ *
+ */
+void ClientEndpoint::digest_incoming() {
+  auto [msgType, msgData] = rcv_data();
+  while (msgType != wwnet::NONE) {
+    for (auto&& cb : callbacks[msgType]) {
+      cb(msgData);
+    }
+    std::tie(msgType, msgData) = rcv_data();
+  }
 }
 
 /**
