@@ -1,8 +1,13 @@
 #include <catch2/catch.hpp>
 #include "../Net/ServerEndpoint.hpp"
 #include "../Net/ClientEndpoint.hpp"
+#include <string>
 
 using Catch::Matchers::Equals;
+
+// Assuming a buffer size of less then 2050 (1024 in this case)
+const std::string A_VERY_LONG_MSG = std::string(2049, 'a') + 'b';
+
 
 TEST_CASE("Connect server and client", "[NetSC]"){
     ServerEndpoint server("127.0.0.1", 12345);
@@ -33,4 +38,9 @@ TEST_CASE("Connect server and client", "[NetSC]"){
     auto [serverType2, serverText2] = server.rcv_single(pc.clientFd);
     REQUIRE(serverType2 == ptx);
     REQUIRE_THAT(serverText2, Equals("Second message"));
+    
+    server.send_single(pc.clientFd, ptx, A_VERY_LONG_MSG.c_str());
+    auto [clientType2, clientText2] = client.rcv_data();
+    REQUIRE(clientType2 == ptx);
+    REQUIRE_THAT(clientText2, Equals(A_VERY_LONG_MSG));
 }

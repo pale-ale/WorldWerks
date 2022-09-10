@@ -69,10 +69,10 @@ std::pair<EMessageType, std::string> rcv_data(int socketFd, char* buffer, int bu
   readBytes = 1;
   std::string text = "";
   while (readBytes > 0 && msgLength > 0) {
-    readBytes = read(socketFd, buffer, std::min<int>(msgLength, bufSize));
+    readBytes = read(socketFd, buffer, std::min<int>(msgLength, bufSize-1));
     msgLength -= readBytes;
+    buffer[readBytes] = '\0';
     text += buffer;
-    buffer[0] = '\0';
   }
   printf("[%s]: RCV: '%s' + '%s' + '%s'.\n", epName, msgTypeStr.c_str(),
          msgLenStr.c_str(), text.c_str());
