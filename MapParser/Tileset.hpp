@@ -1,43 +1,33 @@
 #pragma once
-#include <filesystem>
 
 #include "../3rdParty/tinyxml2.hpp"
 #include "../Data/DataNode.hpp"
+#include <filesystem>
 
-using std::filesystem::canonical;
+namespace fs = std::filesystem;
 
 namespace tmx {
 /**
  * @brief Contains the tiles, dimensions, source image etc. needed to display a tile.
  */
 struct Tileset : public DataNode {
-  Tileset(tinyxml2::XMLElement *element, DataNode *parent, std::filesystem::path mapPath)
-      : DataNode(element, parent), mapPath{mapPath} {}
+  Tileset(tinyxml2::XMLElement *element, DataNode *parent, fs::path mapPath, fs::path tsxPath, int firstGID)
+      : DataNode(element, parent), mapPath{mapPath}, relativeTilesetPath{tsxPath}, firstgid{firstGID} {}
   virtual void commit_data() override {}
   virtual void update_data() override {
-    // Obtain the relative tileset file path and it's first global tile id.
-    bool errors = false;
-    errors |= (bool)element->QueryAttribute("firstgid", &firstgid);
-    errors |= (bool)element->QueryAttribute("source", &relativeTilesetPath);
-    if (errors) {
-      printf("[Tileset]: Errors in tileset node of map file.\n");
-    }
-
-    // Convert the relative path to an absolute one, abort if it doesn't exist.
-    auto mapFolder = mapPath.remove_filename();
-    tilesetPath = std::filesystem::weakly_canonical(
-        mapFolder.append(std::string(relativeTilesetPath)));
-    if (!std::filesystem::exists(tilesetPath)) {
-      printf("[Tileset]: Error reading tileset at '%s': File does not exist.\n",
-             tilesetPath.c_str());
-      return;
-    }
-
+    printf("[Tileset]: Loading tileset data...\n");
     // Open the tsx and read the tileset data.
     tinyxml2::XMLDocument xmlDoc;
-    xmlDoc.LoadFile(tilesetPath.c_str());
+    fileExists = !fetch_data(relativeTilesetPath, data);
+    if (!fileExists) {
+      printf("[Tileset]: Error reading tileset at '%s': File does not exist.\n",
+             relativeTilesetPath.c_str());
+    }
+    tilesetPath = mapPath.remove_filename() / relativeTilesetPath;
+
+    xmlDoc.Parse(data.c_str());
     auto tilesetElement = xmlDoc.FirstChildElement();
-    errors |= !tilesetElement;
+    bool errors = !tilesetElement;
     if (tilesetElement) {
       errors |= (bool)tilesetElement->QueryAttribute("tilewidth", &tilewidth);
       errors |= (bool)tilesetElement->QueryAttribute("tileheight", &tileheight);
@@ -49,19 +39,23 @@ struct Tileset : public DataNode {
       auto imageNode = tilesetElement->FirstChildElement();
       errors |= (bool)imageNode->QueryAttribute("source", &relativeImagePath);
       auto tilesetFolder = std::filesystem::path(tilesetPath).remove_filename();
-      imagePath = std::filesystem::canonical(tilesetFolder.append(relativeImagePath));
+      // TODO imagePath = std::filesystem::canonical(tilesetFolder.append(relativeImagePath));
     }
     if (errors) {
       printf("[Tileset]: Errors in tileset file at '%s'.\n", imagePath.c_str());
+      return;
     }
+    printf("[Tileset]: Loaded successfully.\n");
   }
 
-  std::filesystem::path mapPath;
-  std::string tilesetPath; /** @brief The absolute path to this tileset */
+  fs::path mapPath;
+  std::string data;
+  fs::path tilesetPath; /** @brief The absolute path to this tileset */
+  bool fileExists = false;
 
   // Tileset info inside the tmx
   int firstgid;                    /** @brief The first id in the global map context */
-  const char *relativeTilesetPath; /** @param Used to write the path back later */
+  fs::path relativeTilesetPath; /** @param Used to write the path back later */
 
   // Tileset info inside the tsx
   int tilewidth, tileheight;     /** @brief Tile dimensions in Tiled units */

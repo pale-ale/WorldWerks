@@ -13,7 +13,7 @@
  */
 class ClientEndpoint {
  private:
-  typedef std::function<void(std::string)> EventFunc;
+  typedef std::function<void(const std::string&)> EventFunc;
   static const int bufferSize = 1024;
 
  public:
@@ -27,6 +27,11 @@ class ClientEndpoint {
   bool is_up() { return wwnet::is_socket_up(socketFd); }
   void send_data(wwnet::EMessageType msgType, const char* data);
   bool request_map();
+  bool request_tileset(const std::string &resourcePath){
+    printf("[Client]: Requesting tileset '%s'...\n", resourcePath.c_str());
+    send_data(wwnet::EMessageType::REQ_TSX, resourcePath.c_str());
+    return true;
+  }
   void digest_incoming();
   std::pair<wwnet::EMessageType, std::string> rcv_data();
   void quit();

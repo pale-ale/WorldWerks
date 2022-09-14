@@ -20,7 +20,17 @@ void Map::update_data() {
 
     switch (type->second) {
       case ENodeType::Tileset: {
-        auto t = new Tileset(child, this, documentPath);
+        printf("[Map]: Constructing tileset...\n");
+        bool errors = false;
+        const char* tsxPath;
+        int firstGID;
+        errors |= child->QueryAttribute("source", &tsxPath);
+        errors |= child->QueryAttribute("firstgid", &firstGID);
+        if (errors){
+          printf("[Map]: Error constructing tileset.\n");
+          return;
+        }
+        auto t = new Tileset(child, this, documentPath, tsxPath, firstGID);
         t->update_data();
         tilesets.push_back(t);
         break;

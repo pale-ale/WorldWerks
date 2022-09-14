@@ -46,6 +46,10 @@ add_library (Util
   Util/Util.cpp
 )
 
+# add_library (Storage
+#   Storage/LiveStorage.hpp
+# )
+
 add_executable (client client_main.cpp)
 target_link_libraries(client 
   Scene

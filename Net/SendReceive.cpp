@@ -11,6 +11,13 @@
 
 #define MSG_LENGTH_BYTES 8
 #define MSG_TYPE_BYTES 4
+#define MAX_MSG_LOG_LEN 40
+
+// this converts to string
+#define STR_(x) #x
+
+// this makes sure the argument is expanded before converting to string
+#define STR(x) STR_(x)
 
 namespace wwnet {
 
@@ -32,7 +39,7 @@ void send_data(int socketFd, EMessageType msgType, const char* data, const char*
 
   std::string msg = msgTypeStr + msgLenStr + data;
   send(socketFd, msg.c_str(), msg.length(), 0);
-  printf("[%s]: SND: '%s' + '%s' + '%s'.\n", epName, msgTypeStr.c_str(),
+  printf("[%s]: SND: '%s' + '%s' + '%." STR(MAX_MSG_LOG_LEN) "s [...]'.\n", epName, msgTypeStr.c_str(),
          msgLenStr.c_str(), data);
 }
 
@@ -74,7 +81,7 @@ std::pair<EMessageType, std::string> rcv_data(int socketFd, char* buffer, int bu
     buffer[readBytes] = '\0';
     text += buffer;
   }
-  printf("[%s]: RCV: '%s' + '%s' + '%s'.\n", epName, msgTypeStr.c_str(),
+  printf("[%s]: RCV: '%s' + '%s' + '%." STR(MAX_MSG_LOG_LEN) "s'.\n", epName, msgTypeStr.c_str(),
          msgLenStr.c_str(), text.c_str());
   return {msgType, text};
 }

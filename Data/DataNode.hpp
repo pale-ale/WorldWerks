@@ -24,6 +24,14 @@ class DataNode : public DataChangeSource {
    */
   virtual void commit_data() = 0;
 
+  // return true on error
+  virtual bool fetch_data(const std::string& key, std::string& data){
+    if (!parent){
+      return true;
+    }
+    return parent->fetch_data(key, data);
+  }
+
   /**
    * @brief Get the value of an attribute.
    *

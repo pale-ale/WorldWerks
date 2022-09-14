@@ -7,6 +7,9 @@
 #include "Layer.hpp"
 #include "ObjectGroup.hpp"
 #include "Tileset.hpp"
+#include "filesystem"
+#include "../Storage/LiveStorage.hpp"
+
 
 namespace tmx {
 /**
@@ -41,6 +44,34 @@ struct Map : public DataNode {
   virtual void update_data() override;
   virtual void commit_data() override;
 
+  void update_tileset_data(const std::string& tsxData){
+    printf("[Map]: Updating tileset data....\n");
+    tinyxml2::XMLDocument doc;
+    doc.Parse(tsxData.c_str());
+    const char* tsxName;
+    auto e = doc.FirstChildElement();
+    if (!e){
+      printf("[Map]: Error in tileset data: No first element.\n");
+      return;
+    }
+    e->QueryAttribute("name", &tsxName);
+    for (auto&& ts : tilesets){
+      if (ts->name == tsxName){
+        ts = new tmx::Tileset(e, this, documentPath, ts->tilesetPath, ts->firstgid);
+        ts->update_data();
+      }
+    }
+  }
+
+  virtual bool fetch_data(const std::string& key, std::string& data) override{
+    if (LiveStorage::storage.count(key) > 0){
+      data = LiveStorage::storage[key];
+      return false;
+    }
+    printf("[Map]: Cannot fetch key %s: Key does not exist.\n", key.c_str());
+    return true;
+  }
+
   /** @brief The width of the map in no. of tiles */
   int width;
 
@@ -60,7 +91,7 @@ struct Map : public DataNode {
   int nextobjectid;
 
   /** @brief Needed to use the relative paths provided by Tiled's map files */
-  const char *documentPath;
+  std::filesystem::path documentPath;
 
   /** @brief Tile Layers in this map */
   std::vector<Layer *> layers;

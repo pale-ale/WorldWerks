@@ -5,6 +5,7 @@
 #include "UI/UISystem.hpp"
 #include "Scene/SceneManager.hpp"
 #include "Scene/GameScene.hpp"
+#include "MapParser/MapParser.hpp"
 
 bool RUNNING = true;
 int PIXELSCALE = 2;
@@ -29,6 +30,7 @@ int main() {
 
   sceneManager.sceneContext.uiSystem = &uiSystem;
   sceneManager.sceneContext.resolution = {RESOLUTION.x, RESOLUTION.y};
+  sceneManager.sceneContext.mapParser = new tmx::MapParser();
   sceneManager.load_scene<MainMenuScene>();
 
   auto cb = [](const sf::Event& event, const sf::Vector2i& mousePos) {
