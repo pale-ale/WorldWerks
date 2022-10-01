@@ -6,14 +6,14 @@
 
 #include "MapParser/MapParser.hpp"
 #include "Net/ServerEndpoint.hpp"
-#include "Util/Util.hpp"
 #include "Storage/LiveStorage.hpp"
+#include "Util/Util.hpp"
 
 ServerEndpoint serverEp("127.0.0.1", 12345);
 fs::path mapPath = get_home_dir().string() + std::string("/WorldWerksMaps/");
 tmx::MapParser mp;
 
-void read_file_to_storage(const char* file, std::string storageKey){
+void read_file_to_storage(const char* file, std::string storageKey) {
   std::ifstream t(file);
   std::stringstream buffer;
   buffer << t.rdbuf();
@@ -24,17 +24,16 @@ int main(int argc, char* argv[]) {
   std::error_code err;
   switch (argc) {
     case 1: {
-      fs::create_directory(
-          mapPath,
-          err);  // If the directory is already present, err.value() will still be 0.
+      fs::create_directory(mapPath, err);
+      // If the directory is already present, err.value() will still be 0.
       if (err.value() != 0) {
-        printf("[Server]: Error creating directory '%s': %s\n", mapPath.c_str(),
-               err.message().c_str());
+        LOGERR("Server", fmt::format("Error creating directory '{}': {}.",
+                                     mapPath.c_str(), err.message().c_str()));
         exit(1);
       }
 
       mapPath += get_timestamp() + ".tmx";
-      printf("[Server]: Created empty map at '%s'.\n", mapPath.c_str());
+      LOGINF("Server", fmt::format("Created empty map at '{}'.", mapPath.c_str()));
       std::ofstream{mapPath.c_str()};
       mp.load_file(mapPath);
       // TODO: Create the file & open it etc.
@@ -43,16 +42,16 @@ int main(int argc, char* argv[]) {
     case 2: {
       mapPath = fs::canonical(argv[1], err);
       if (err.value() != 0) {
-        printf("[Server]: Cannot load map at '%s': %s.\n", argv[1],
-               err.message().c_str());
+        LOGERR("Server", fmt::format("Cannot load map at '{}': {}.", argv[1],
+                                     err.message().c_str()));
         exit(1);
       }
       if (!fs::is_regular_file(mapPath)) {
-        printf("[Server]: Cannot load map at '%s': Not a regular file.\n",
-               mapPath.c_str());
+        LOGERR("Server", fmt::format("Cannot load map at '{}': Not a regular file.",
+                                     mapPath.c_str()));
         exit(1);
       }
-      printf("[Server]: Loading map at '%s'.\n", mapPath.c_str());
+      LOGINF("Server", fmt::format("Loading map at '{}'.", mapPath.c_str()));
       read_file_to_storage("/home/alba/WorldWerksMap/Background.tsx", "Background.tsx");
       read_file_to_storage("/home/alba/WorldWerksMap/Tiles.tsx", "Tiles.tsx");
       mp.load_file(mapPath);
@@ -61,24 +60,23 @@ int main(int argc, char* argv[]) {
     }
 
     default: {
-      printf(
-          "[Server]: I only need a single map path as argument, or no argument at all to "
-          "create a new one.\n");
+      LOGERR("Server",
+             "I only need a single map path as argument, or no argument at all to create "
+             "a new one.");
       break;
     }
   }
 
-  printf("[Server]: Loaded map.\n");
-  serverEp.callbacks[wwnet::EMessageType::REQ_MAP].push_back([](int clientFd,
-                                                                const std::string &_) {
-    serverEp.send_single(clientFd, wwnet::RES_MAP, mp.get_data().c_str());
-  });
-  serverEp.callbacks[wwnet::EMessageType::REQ_TSX].push_back([](int clientFd,
-                                                                const std::string &tsxPath) {
-    auto tsx = mp.get_tileset(tsxPath);
-    printf("test: %s\n", tsx->data.c_str());
-    serverEp.send_single(clientFd, wwnet::RES_TSX, tsx->data.c_str());
-  });
+  LOGINF("Server", "Loaded map.");
+  serverEp.callbacks[wwnet::EMessageType::REQ_MAP].push_back(
+      [](int clientFd, const std::string& _) {
+        serverEp.send_single(clientFd, wwnet::RES_MAP, mp.get_data().c_str());
+      });
+  serverEp.callbacks[wwnet::EMessageType::REQ_TSX].push_back(
+      [](int clientFd, const std::string& tsxPath) {
+        auto tsx = mp.get_tileset(tsxPath);
+        serverEp.send_single(clientFd, wwnet::RES_TSX, tsx->data.c_str());
+      });
 
   for (int i = 0; i < 20; i++) {
     auto conn = serverEp.accept_connection();

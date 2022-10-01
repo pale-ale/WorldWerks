@@ -1,11 +1,10 @@
 #pragma once
 
-#include <cstdio>
-#include <filesystem>
 #include <map>
 #include <string>
 
-namespace fs = std::filesystem;
+#include "../Util/Log.hpp"
+
 using std::string;
 
 class LiveStorage {
@@ -14,9 +13,9 @@ class LiveStorage {
 
   static string* create_entry(const string& key) {
     if (storage.count(key) > 0) {
-      printf("[Storage]: Cannot create storage space: Key '%s' already exists.\n",
-             key.c_str());
-      
+      LOGERR("LiveStorage",
+             fmt::format("Cannot create storage space: Key '{}' already exists.",
+                         key.c_str()));
       return nullptr;
     }
     return &storage[key];

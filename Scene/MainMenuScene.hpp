@@ -1,9 +1,9 @@
 #pragma once
-#include <stdio.h>
-
-#include "SceneBase.hpp"
-#include "GameScene.hpp"
 #include <string>
+
+#include "../Util/Log.hpp"
+#include "GameScene.hpp"
+#include "SceneBase.hpp"
 
 /**
  * @brief The scene shown at the game's startup.
@@ -11,7 +11,7 @@
  */
 class MainMenuScene : public SceneBase {
  public:
-  MainMenuScene(SceneManager *sm, SceneContext* sceneContext);
+  MainMenuScene(SceneManager* sm, SceneContext* sceneContext);
   virtual void event_load_scene() override;
 
  protected:
@@ -22,7 +22,6 @@ class MainMenuScene : public SceneBase {
 
  private:
   void event_join_clicked();
-
 
   sf::RectangleShape bgShape;
   std::shared_ptr<WTextbox> ipTb;

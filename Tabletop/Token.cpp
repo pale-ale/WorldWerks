@@ -6,7 +6,6 @@
    * @param newPosition 
    */
   void Token::set_position(const sf::Vector2i &newPosition){
-    printf("[Token]: I've been moved!\n");
     position = newPosition;
     send_data_changed();
   }

@@ -32,7 +32,6 @@ void WToken::set_outline_color(sf::Color color) {
 void WToken::setup_sprite() {
   rtex = new sf::RenderTexture();
   if (!rtex->create(get_full_radius() * 2, get_full_radius() * 2)) {
-    printf("Couldnt create render texture in TokenDisplay");
     exit(1);
   }
   rtex->clear(sf::Color::Transparent);

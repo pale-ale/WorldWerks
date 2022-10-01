@@ -2,7 +2,6 @@
 
 #include <fcntl.h>
 #include <netinet/in.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -10,18 +9,19 @@
 #include <cerrno>
 #include <cstring>
 
+#include "../Util/Log.hpp"
 #include "SendReceive.hpp"
 
 ServerEndpoint::ServerEndpoint(const char *ipv4, int port) {
   serverFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
   if (serverFd == -1) {
-    printf("[Server]: Could not create a new socket. %d\n", errno);
+    LOGERR("Server", fmt::format("Could not create a new socket. Error code {}.", errno));
     exit(1);
   }
   int option_value = 1;
   if (setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &option_value,
                  sizeof(option_value)) == -1) {
-    printf("[Server]: Could not setsockopt().\n");
+    LOGERR("Server", "Could not setsockopt().");
     exit(1);
   }
   address.sin_family = AF_INET;
@@ -29,12 +29,12 @@ ServerEndpoint::ServerEndpoint(const char *ipv4, int port) {
   address.sin_port = port;
 
   if (bind(serverFd, (sockaddr *)&address, sizeof(address))) {
-    printf("[Server]: Could not bind.\n");
+    LOGERR("Server", "Could not bind to port.");
     exit(1);
   }
 
   if (listen(serverFd, 10) == -1) {
-    printf("[Server]: Cannot listen: %d\n", errno);
+    LOGERR("Server", fmt::format("Cannot listen: {}", errno));
     exit(1);
   }
 }
@@ -53,21 +53,22 @@ PlayerConnection ServerEndpoint::accept_connection() {
     if (errno == 11) {  // No connection to accept exists yet.
       return pc;
     }
-    printf("[Server]: Could not accept a socket: %d\n", errno);
+    LOGERR("Server", fmt::format("Could not accept a socket: {}", errno));
     exit(1);
   }
   int flags = fcntl(pc.clientFd, F_GETFL);
   if (flags == -1) {
-    printf("[Server]: Could not get flags of accepted socket: %d\n", errno);
+    LOGERR("Server", fmt::format("Could not get flags of accepted socket: {}", errno));
     exit(1);
   }
   flags |= O_NONBLOCK;
   if (fcntl(pc.clientFd, F_SETFL, flags) != 0) {
-    printf("[Server]: Could not set accepted connection to non-blocking mode: %d\n",
-           errno);
+    LOGERR(
+        "Server",
+        fmt::format("Could not set accepted connection to non-blocking mode: {}", errno));
     exit(1);
   }
-  printf("[Server]: Connection accepted.\n");
+  LOGERR("Server", fmt::format("Connection accepted."));
   // close(pc.clientFd);
   // shutdown(serverFd, SHUT_RDWR);
   return pc;
@@ -109,7 +110,7 @@ std::pair<wwnet::EMessageType, std::string> ServerEndpoint::rcv_single(int clien
 }
 
 /**
- * @brief Process a single incoming message on each connection. 
+ * @brief Process a single incoming message on each connection.
  *
  */
 void ServerEndpoint::digest_incoming() {

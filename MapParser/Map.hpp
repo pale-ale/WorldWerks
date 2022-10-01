@@ -4,12 +4,12 @@
 
 #include "../3rdParty/tinyxml2.hpp"
 #include "../Data/DataNode.hpp"
+#include "../Storage/LiveStorage.hpp"
+#include "../Util/Log.hpp"
 #include "Layer.hpp"
 #include "ObjectGroup.hpp"
 #include "Tileset.hpp"
 #include "filesystem"
-#include "../Storage/LiveStorage.hpp"
-
 
 namespace tmx {
 /**
@@ -26,6 +26,7 @@ const std::map<ENodeType, std::string> NodeTypeNameMap{
     {ENodeType::Tileset, "tileset"},
     {ENodeType::Object, "object"},
     {ENodeType::ObjectGroup, "objectgroup"}};
+
 /**
  * @brief Used to convert a string to the corresponding ENodeType.
  */
@@ -35,40 +36,24 @@ const std::map<std::string, ENodeType> NodeNameTypeMap{
     {"tileset", ENodeType::Tileset},
     {"object", ENodeType::Object},
     {"objectgroup", ENodeType::ObjectGroup}};
+
 /**
  * @brief Contains Layers which themselves contain everything on the map.
  */
 struct Map : public DataNode {
-  Map(XMLElement *element, const char *documentPath)
+  Map(XMLElement* element, const char* documentPath)
       : DataNode(element), documentPath{documentPath} {}
   virtual void update_data() override;
   virtual void commit_data() override;
+  void update_tileset_data(const std::string& tsxData);
 
-  void update_tileset_data(const std::string& tsxData){
-    printf("[Map]: Updating tileset data....\n");
-    tinyxml2::XMLDocument doc;
-    doc.Parse(tsxData.c_str());
-    const char* tsxName;
-    auto e = doc.FirstChildElement();
-    if (!e){
-      printf("[Map]: Error in tileset data: No first element.\n");
-      return;
-    }
-    e->QueryAttribute("name", &tsxName);
-    for (auto&& ts : tilesets){
-      if (ts->name == tsxName){
-        ts = new tmx::Tileset(e, this, documentPath, ts->tilesetPath, ts->firstgid);
-        ts->update_data();
-      }
-    }
-  }
-
-  virtual bool fetch_data(const std::string& key, std::string& data) override{
-    if (LiveStorage::storage.count(key) > 0){
+  virtual bool fetch_data(const std::string& key, std::string& data) override {
+    if (LiveStorage::storage.count(key) > 0) {
       data = LiveStorage::storage[key];
       return false;
     }
-    printf("[Map]: Cannot fetch key %s: Key does not exist.\n", key.c_str());
+    LOGERR("Map",
+           fmt::format("Cannot fetch key \"{}\": Key does not exist.", key.c_str()));
     return true;
   }
 
@@ -94,12 +79,12 @@ struct Map : public DataNode {
   std::filesystem::path documentPath;
 
   /** @brief Tile Layers in this map */
-  std::vector<Layer *> layers;
+  std::vector<Layer*> layers;
 
   /** @brief Object Layers in this map */
-  std::vector<ObjectGroup *> objectGroups;
+  std::vector<ObjectGroup*> objectGroups;
 
   /** @brief Tilesets referenced by this map */
-  std::vector<Tileset *> tilesets;
+  std::vector<Tileset*> tilesets;
 };
 }  // namespace tmx

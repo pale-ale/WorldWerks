@@ -1,9 +1,12 @@
 #pragma once
+#include <fmt/core.h>
+
 #include <map>
 #include <memory>
 #include <vector>
 
 #include "../3rdParty/tinyxml2.hpp"
+#include "../Util/Log.hpp"
 #include "DataChangeSource.hpp"
 
 using tinyxml2::XMLElement;
@@ -24,9 +27,15 @@ class DataNode : public DataChangeSource {
    */
   virtual void commit_data() = 0;
 
-  // return true on error
-  virtual bool fetch_data(const std::string& key, std::string& data){
-    if (!parent){
+  /**
+   * @brief Obtain data from the data tree.
+   * 
+   * @param key The key used to search for the according data
+   * @param data Where the data will be written to
+   * @return true on error, false otherwise
+   */
+  virtual bool fetch_data(const std::string &key, std::string &data) {
+    if (!parent) {
       return true;
     }
     return parent->fetch_data(key, data);
@@ -34,8 +43,13 @@ class DataNode : public DataChangeSource {
 
   /**
    * @brief Get the value of an attribute.
-   *
-   * @return true: Success --- false: Missing or wrong field
+   * 
+   * @tparam T The type of the attribute
+   * @param fieldName The name of the attribute
+   * @param out The attribute data will be found here
+   * @param required If not required, this function will always return true
+   * @param typeHint Used for debugging, displays the expected type
+   * @return true on success, false if attribute missing or of wrong type
    */
   template <typename T>
   bool get_attribute(std::string fieldName, T *out, bool required = false,
@@ -48,7 +62,7 @@ class DataNode : public DataChangeSource {
     auto err = "";
     switch (ret) {
       case tinyxml2::XML_WRONG_ATTRIBUTE_TYPE:
-        err = "Wrong field type (%s required).", typeHint;
+        err = "Wrong field type ({} required).", typeHint;
         break;
       case tinyxml2::XML_NO_ATTRIBUTE:
         err = "No such attribute.";
@@ -57,8 +71,8 @@ class DataNode : public DataChangeSource {
       default:
         break;
     }
-    printf("[DataNode]: Error reading required attribute '%s': %s\n", fieldName.c_str(),
-           err);
+    LOGERR("DataNode", fmt::format("Error reading required attribute '{}': {}.",
+                                   fieldName.c_str(), err));
     return false;
   }
 

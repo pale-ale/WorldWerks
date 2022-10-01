@@ -3,7 +3,6 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <netinet/in.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -11,10 +10,13 @@
 
 #include <cerrno>
 
+#include "../Util/Log.hpp"
+
 ClientEndpoint::ClientEndpoint() {
   socketFd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
   if (socketFd == -1) {
-    printf("[ClientEndpoint]: Could not create a new socket. %d\n", errno);
+    LOGERR("ClientEndpoint",
+           fmt::format("Could not create a new socket: Errno {}.", errno));
     exit(1);
   }
 }
@@ -32,16 +34,16 @@ void ClientEndpoint::start_connecting(const char* ipv4, int port) {
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_port = port;
   if (inet_pton(AF_INET, ipv4, &serverAddress.sin_addr) != 1) {
-    printf("[Client]: Bad address: '%s'.\n", ipv4);
+    LOGERR("Client", fmt::format("Bad address: '{}'.", ipv4));
     return;
   }
   if (connect(socketFd, (sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
     if (errno != 115) {  // errno 115: We have not finished our handshake yet.
-      printf("[Client]: Could not connect to server: %d\n", errno);
+      LOGERR("Client", fmt::format("Could not connect to server: {}.", errno));
       return;
     }
   }
-  printf("[Client]: Connecing to: '%s:%d'...\n", ipv4, port);
+  LOGINF("Client", fmt::format("Connecing to: '{}:{}'...", ipv4, port));
 }
 
 /**
@@ -58,7 +60,7 @@ bool ClientEndpoint::is_connected_and_buffer_empty() {
     if (errno == 11) {
       return true;
     } else {
-      printf("[Client]: Error checking connection status: %d\n", errno);
+      LOGERR("Client", fmt::format("Error checking connection status: {}", errno));
     }
   }
   return false;
@@ -116,5 +118,5 @@ void ClientEndpoint::digest_incoming() {
  */
 void ClientEndpoint::quit() {
   close(socketFd);
-  printf("[Client]: Quit.");
+  LOGINF("Client", fmt::format("Quit."));
 }

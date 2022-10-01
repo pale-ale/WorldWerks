@@ -1,5 +1,7 @@
 #include "TokenUI.hpp"
 
+#include "../Util/Log.hpp"
+
 TokenUI::TokenUI(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
                  const sf::Vector2i &size)
     : UIElement(uiSystem, parent, size) {
@@ -11,11 +13,11 @@ TokenUI::TokenUI(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
 }
 
 void TokenUI::set_token(Token *token) {
-  if (displayedToken == token){
-    printf("[TokenUI]: Token already displayed. Nothing to do.\n");
+  if (displayedToken == token) {
+    LOGDBG("TokenUI", "Token already displayed. Nothing to do.");
     return;
   }
-  printf("[TokenUI]: Set token.\n");
+  LOGDBG("TokenUI", "Set token.");
   displayedToken = token;
   if (token) {
     tokenTitle->set_text_binding({[token] { return token->get_title(); },

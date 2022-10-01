@@ -57,6 +57,7 @@ target_link_libraries(client
   TMXParser UI 
   Server Client 
   Util Tabletop Data
+  fmt
   sfml-graphics sfml-window sfml-system 
 )
 
@@ -65,6 +66,7 @@ target_link_libraries(server
   TMXParser
   Server 
   Util
+  fmt
 )
 
 add_executable(tests test.cpp)
@@ -72,5 +74,6 @@ target_link_libraries(tests PRIVATE Catch2::Catch2WithMain
   Util TMXParser UI 
   Server Client
   Util Tabletop Data
+  fmt
   sfml-graphics sfml-window sfml-system
 )

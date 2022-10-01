@@ -1,8 +1,10 @@
 #pragma once
 
+#include <filesystem>
+
 #include "../3rdParty/tinyxml2.hpp"
 #include "../Data/DataNode.hpp"
-#include <filesystem>
+#include "../Util/Log.hpp"
 
 namespace fs = std::filesystem;
 
@@ -11,17 +13,21 @@ namespace tmx {
  * @brief Contains the tiles, dimensions, source image etc. needed to display a tile.
  */
 struct Tileset : public DataNode {
-  Tileset(tinyxml2::XMLElement *element, DataNode *parent, fs::path mapPath, fs::path tsxPath, int firstGID)
-      : DataNode(element, parent), mapPath{mapPath}, relativeTilesetPath{tsxPath}, firstgid{firstGID} {}
+  Tileset(tinyxml2::XMLElement *element, DataNode *parent, fs::path mapPath,
+          fs::path tsxPath, int firstGID)
+      : DataNode(element, parent),
+        mapPath{mapPath},
+        relativeTilesetPath{tsxPath},
+        firstgid{firstGID} {}
   virtual void commit_data() override {}
   virtual void update_data() override {
-    printf("[Tileset]: Loading tileset data...\n");
+    LOGINF("Tileset", "Loading tileset data...");
     // Open the tsx and read the tileset data.
     tinyxml2::XMLDocument xmlDoc;
     fileExists = !fetch_data(relativeTilesetPath, data);
     if (!fileExists) {
-      printf("[Tileset]: Error reading tileset at '%s': File does not exist.\n",
-             relativeTilesetPath.c_str());
+      LOGERR("Tileset", fmt::format("Error reading tileset at '{}': File does not exist.",
+                                    relativeTilesetPath.c_str()));
     }
     tilesetPath = mapPath.remove_filename() / relativeTilesetPath;
 
@@ -39,13 +45,15 @@ struct Tileset : public DataNode {
       auto imageNode = tilesetElement->FirstChildElement();
       errors |= (bool)imageNode->QueryAttribute("source", &relativeImagePath);
       auto tilesetFolder = std::filesystem::path(tilesetPath).remove_filename();
-      // TODO imagePath = std::filesystem::canonical(tilesetFolder.append(relativeImagePath));
+      // TODO imagePath =
+      // std::filesystem::canonical(tilesetFolder.append(relativeImagePath));
     }
     if (errors) {
-      printf("[Tileset]: Errors in tileset file at '%s'.\n", imagePath.c_str());
+      LOGERR("Tileset",
+             fmt::format("Errors in tileset file at '{}'.", imagePath.c_str()));
       return;
     }
-    printf("[Tileset]: Loaded successfully.\n");
+    LOGINF("Tileset", "Loaded successfully.");
   }
 
   fs::path mapPath;
@@ -54,7 +62,7 @@ struct Tileset : public DataNode {
   bool fileExists = false;
 
   // Tileset info inside the tmx
-  int firstgid;                    /** @brief The first id in the global map context */
+  int firstgid;                 /** @brief The first id in the global map context */
   fs::path relativeTilesetPath; /** @param Used to write the path back later */
 
   // Tileset info inside the tsx

@@ -21,7 +21,7 @@ class MapParser {
    * @return true if loading/parsing of the file was succesful, false otherwise
    */
   bool load_file(const std::string &path) {
-    printf("[MapParser]: Loading file '%s'.\n", path.c_str());
+    LOGINF("MapParser", fmt::format("Loading file '{}'.", path.c_str()));
     std::ifstream is(path);
     std::stringstream buffer;
     buffer << is.rdbuf();
@@ -29,7 +29,8 @@ class MapParser {
 
     auto err = xmlDoc.LoadFile(path.c_str());
     if (err != tinyxml2::XMLError::XML_SUCCESS) {
-      printf("[MapParser]: Error reading XML Document: \n%s\n", xmlDoc.ErrorStr());
+      LOGERR("MapParser",
+             fmt::format("Error reading XML Document: {}.", xmlDoc.ErrorStr()));
       return false;
     }
     return extract(path.c_str());
@@ -46,7 +47,8 @@ class MapParser {
     data = text;
     auto err = xmlDoc.Parse(text.c_str());
     if (err != tinyxml2::XMLError::XML_SUCCESS) {
-      printf("[MapParser]: Error reading XML Document: \n%s\n", xmlDoc.ErrorStr());
+      LOGERR("MapParser",
+             fmt::format("Error reading XML Document: {}.", xmlDoc.ErrorStr()));
       return false;
     }
     return extract(mapPath);
@@ -62,40 +64,43 @@ class MapParser {
   bool save_file(const char *savePath) {
     auto err = xmlDoc.SaveFile(savePath);
     if (err != tinyxml2::XMLError::XML_SUCCESS) {
-      printf("[MapParser]: Error saving XML Document: \n%s\n", xmlDoc.ErrorStr());
+      LOGERR("MapParser",
+             fmt::format("Error saving XML Document: {}.", xmlDoc.ErrorStr()));
       return false;
     }
-    printf("[MapParser]: Saved.\n");
+    LOGINF("MapParser", "Saved.");
     return true;
   }
 
   std::vector<std::string> get_missing_resource_paths() {
     std::vector<std::string> mrp;
-    printf("[MapParser]: Tilesets:\n");
+    LOGDBG("MapParser", "Tilesets:");
     for (auto &&tileset : map->tilesets) {
       if (!tileset->fileExists) {
         mrp.push_back(tileset->tilesetPath);
       }
-      printf("TSX Name: '%s', Path: '%s', Exists: '%s'\n", tileset->name.c_str(),
-              tileset->tilesetPath.c_str(), tileset->fileExists ? "Yes" : "No");
+      LOGDBG("MapParser", fmt::format("\tTSX Name: '{}', Path: '{}', Exists: '{}'",
+                                      tileset->name.c_str(), tileset->tilesetPath.c_str(),
+                                      tileset->fileExists ? "Yes" : "No"));
     }
     return mrp;
   }
 
-  const Tileset* get_tileset(const fs::path &tilesetPath){
+  const Tileset *get_tileset(const fs::path &tilesetPath) {
     std::error_code ec1;
     std::error_code ec2;
     auto mapPath = map->documentPath.remove_filename();
-    for (auto&& tsx : map->tilesets){
-      if (tsx->fileExists){
+    for (auto &&tsx : map->tilesets) {
+      if (tsx->fileExists) {
         auto p1 = fs::absolute(mapPath / tilesetPath, ec1);
         auto p2 = fs::absolute(tsx->tilesetPath, ec2);
-        if(p1 == p2 && !ec1 && !ec2){
+        if (p1 == p2 && !ec1 && !ec2) {
           return tsx;
         }
       }
     }
-    printf("[MapParser]: No tileset found.\n");
+    LOGWRN("MapParser",
+           fmt::format("Tileset at '{}' not found.", (mapPath / tilesetPath).c_str()));
     return nullptr;
   }
 
@@ -112,7 +117,7 @@ class MapParser {
    * @return true if there were no errors, false otherwise
    */
   bool extract(const char *path) {
-    printf("[MapParser]: Extracting map data...\n");
+    LOGINF("MapParser", "Extracting map data...");
     auto root = xmlDoc.RootElement();
     map = new Map(root, path);
     map->update_data();

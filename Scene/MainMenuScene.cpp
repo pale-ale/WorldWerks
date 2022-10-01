@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include <string>
 
 #include "../Net/ClientEndpoint.hpp"
@@ -35,7 +33,7 @@ void MainMenuScene::event_load_scene() {
   ipTb = uiSys->create_widget<WTextbox>(root, portBinding, portSize, portPos);
   joinBtn = uiSys->create_widget<WButton>(root, joinSize, joinPos);
   joinBtn->buttonClickCallback = [this]() { this->event_join_clicked(); };
-  printf("[MainMenuScene]: Loaded.\n");
+  LOGINF("MainMenuScene", "Loaded.");
 }
 
 void MainMenuScene::event_join_clicked() {
@@ -43,7 +41,7 @@ void MainMenuScene::event_join_clicked() {
   ep->start_connecting(ip.c_str(), std::stoi(port));
   sceneContext->clientEp = ep;
   if (ep->is_up() && ep->is_connected_and_buffer_empty()) {
-    printf("[MainMenuScene]: Connected successfully.\n");
+    LOGINF("MainMenuScene", "Connected successfully.");
     sceneManager->load_scene<GameScene>();
   }
 }

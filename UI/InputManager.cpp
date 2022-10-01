@@ -1,5 +1,7 @@
 #include "InputManager.hpp"
 
+#include "../Util/Log.hpp"
+
 void InputManager::register_callback(EventFunc callback, InputEventType filter) {
   switch (filter) {
     case InputEventType::KeyboardEvent:
@@ -10,13 +12,13 @@ void InputManager::register_callback(EventFunc callback, InputEventType filter) 
       break;
 
     default:
-      printf("Inputmanager callback register failed. How'd you even do that?");
+      LOGERR("InputManager", "Cannot register callback: Unknown callback type.");
       break;
   }
 }
 
 void InputManager::remove_callback(EventFunc callback, InputEventType filter) {
-  printf("Not yet implemented!");
+  LOGWRN("InputManager", "remove_callback() is not yet implemented!");
 }
 
 void InputManager::process_event(const sf::Event &event, const sf::Vector2i &mousePos) {

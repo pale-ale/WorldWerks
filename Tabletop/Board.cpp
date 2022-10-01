@@ -25,7 +25,7 @@ void Board::extract_tokens(const tmx::ObjectGroup &tokenGroup) {
  */
 void Board::extract_background(const tmx::ObjectGroup &bgGroup) {
   for (auto &&object : bgGroup.objects) {
-    printf("\t BG Name: '%s'\n", object->name.c_str());
+    LOGDBG("Board", fmt::format("\t BG Name: '{}'.", object->name.c_str()));
     sf::Vector2i pos{object->x, object->y};
     backgroundGraphics.push_back({pos, object->id});
   }
@@ -36,14 +36,14 @@ void Board::extract_background(const tmx::ObjectGroup &bgGroup) {
  */
 void Board::parse_map() {
   tokens.clear();
-  printf("Object Groups:\n");
+  LOGDBG("Board", "Extracting object groups...");
   for (auto objGroup : map->objectGroups) {
     if (strcmp(objGroup->name, "Entities") == 0) {
       extract_tokens(*objGroup);
     } else if (strcmp(objGroup->name, "Background") == 0) {
       extract_background(*objGroup);
     } else {
-      printf("Unknown group name: '%s'\n", objGroup->name);
+      LOGWRN("Board", fmt::format("Unknown group name: '{}'.", objGroup->name));
     }
   }
 }

@@ -6,6 +6,7 @@
 
 #include <string>
 
+#include "../Util/Log.hpp"
 #include "../Util/Util.hpp"
 #include "Proto/Protocol.hpp"
 
@@ -28,7 +29,7 @@ namespace wwnet {
  */
 void send_data(int socketFd, EMessageType msgType, const char* data, const char* epName) {
   if (msgType == EMessageType::NONE) {
-    printf("[%s]: Cannot send messages of type NONE.\n", epName);
+    LOGERR(epName, "Cannot send messages of type NONE.");
     return;
   }
   std::string msgLenStr = std::to_string(strlen(data));
@@ -39,8 +40,8 @@ void send_data(int socketFd, EMessageType msgType, const char* data, const char*
 
   std::string msg = msgTypeStr + msgLenStr + data;
   send(socketFd, msg.c_str(), msg.length(), 0);
-  printf("[%s]: SND: '%s' + '%s' + '%." STR(MAX_MSG_LOG_LEN) "s [...]'.\n", epName, msgTypeStr.c_str(),
-         msgLenStr.c_str(), data);
+  LOGDBG(epName, fmt::format("SND: '{}' + '{}' + \'{:." STR(MAX_MSG_LOG_LEN) "}[...]\'.",
+                             msgTypeStr.c_str(), msgLenStr.c_str(), data));
 }
 
 /**
@@ -58,7 +59,7 @@ std::pair<EMessageType, std::string> rcv_data(int socketFd, char* buffer, int bu
     return {EMessageType::NONE, ""};
   }
   if (readBytes != MSG_TYPE_BYTES) {
-    printf("[%s]: Received message without message type.\n", epName);
+    LOGERR(epName, "Received message without message type.");
     return {EMessageType::BROKEN, ""};
   }
   EMessageType msgType = (EMessageType)std::stoi(msgTypeStr);
@@ -67,7 +68,7 @@ std::pair<EMessageType, std::string> rcv_data(int socketFd, char* buffer, int bu
   std::string msgLenStr(MSG_LENGTH_BYTES, '\0');
   readBytes = read(socketFd, &msgLenStr[0], MSG_LENGTH_BYTES);
   if (readBytes != MSG_LENGTH_BYTES) {
-    printf("[%s]: Received message without length.\n", epName);
+    LOGERR(epName, "Received message without length.");
     return {EMessageType::BROKEN, ""};
   }
   int msgLength = std::stoi(msgLenStr);
@@ -76,13 +77,14 @@ std::pair<EMessageType, std::string> rcv_data(int socketFd, char* buffer, int bu
   readBytes = 1;
   std::string text = "";
   while (readBytes > 0 && msgLength > 0) {
-    readBytes = read(socketFd, buffer, std::min<int>(msgLength, bufSize-1));
+    readBytes = read(socketFd, buffer, std::min<int>(msgLength, bufSize - 1));
     msgLength -= readBytes;
     buffer[readBytes] = '\0';
     text += buffer;
   }
-  printf("[%s]: RCV: '%s' + '%s' + '%." STR(MAX_MSG_LOG_LEN) "s'.\n", epName, msgTypeStr.c_str(),
-         msgLenStr.c_str(), text.c_str());
+  LOGDBG(epName,
+         fmt::format("RCV: \'{}\' + \'{}\' + \'{:." STR(MAX_MSG_LOG_LEN) "}[...]\'.",
+                     msgTypeStr.c_str(), msgLenStr.c_str(), text.c_str()));
   return {msgType, text};
 }
 
@@ -93,14 +95,15 @@ std::pair<EMessageType, std::string> rcv_data(int socketFd, char* buffer, int bu
  * @return true --- The socket is up.
  * @return false --- Socket is not connected / was sut down.
  */
-bool is_socket_up(int socketFd) {
+bool is_socket_up(int socketFd, const char* epName) {
   int error = 0;
   socklen_t len = sizeof(error);
   int retval = getsockopt(socketFd, SOL_SOCKET, SO_ERROR, &error, &len);
   int result = error | retval;
   if (result != 0) {
-    printf("[Client]: Non-Zero socket connection status: %d (error) | %d (status)\n",
-           error, retval);
+    LOGERR(epName,
+           fmt::format("Non-Zero socket connection status: {} (error) | {} (status)",
+                       error, retval));
   }
   return (error | retval) == 0;
 }
