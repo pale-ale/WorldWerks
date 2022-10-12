@@ -14,32 +14,25 @@ void Map::update_data() {
        child = child->NextSiblingElement()) {
     auto type = NodeNameTypeMap.find(std::string(child->Name()));
     if (type == NodeNameTypeMap.end()) {
-      LOG("Map", ELogLevel::ERROR,
-          fmt::format("Invalid type while parsing map children: '{}'.", child->Name()));
+      LOGERR("Map", fmt::format("Invalid type while parsing map children: '{}'.",
+                                child->Name()));
       continue;
     }
 
     switch (type->second) {
       case ENodeType::Tileset: {
-        LOG("Map", ELogLevel::DEBUG, "Constructing tileset...");
-        bool errors = false;
-        const char* tsxPath;
-        int firstGID;
-        errors |= child->QueryAttribute("source", &tsxPath);
-        errors |= child->QueryAttribute("firstgid", &firstGID);
-        if (errors) {
-          LOG("Map", ELogLevel::ERROR, "Error constructing tileset.");
-          return;
+        auto&&[tilesetPath, firstgid, errors] = get_tileset_info(child);
+        if (errors){
+          LOGERR("Map", "Error constructing tileset.");
+          break;
         }
-        auto t = new Tileset(child, this, documentPath, tsxPath, firstGID);
-        t->update_data();
-        tilesets.push_back(t);
+        tilesets.push_back(new Tileset(nullptr, this, documentPath, tilesetPath, firstgid));
         break;
       }
 
       case ENodeType::Layer: {
-        Layer* layer = new Layer();
-        layer->parse(child);
+        Layer* layer = new Layer(child, this);
+        layer->update_data();
         layers.push_back(layer);
         break;
       }
@@ -60,26 +53,17 @@ void Map::update_data() {
 void Map::commit_data() {}
 
 /**
- * @brief Build a tileset with the data in tsxData.
- *
- * @param tsxData Contains the necessary data and paths to create a tileset
+ * @brief Obtain the source file and the firstgid of a tileset XMLElement in a tmx file.
+ * 
+ * @param element the XMLElement to get the values from
+ * @return std::tuple<std::string, int, bool> i.e. the relative source file path, firstgid, and if errors were found
  */
-void Map::update_tileset_data(const std::string& tsxData) {
-  LOGINF("Map", "Updating tileset data...");
-  tinyxml2::XMLDocument doc;
-  doc.Parse(tsxData.c_str());
-  const char* tsxName;
-  auto e = doc.FirstChildElement();
-  if (!e) {
-    LOGERR("Map", "Error in tileset data: No first element.");
-    return;
-  }
-  e->QueryAttribute("name", &tsxName);
-  for (auto&& ts : tilesets) {
-    if (ts->name == tsxName) {
-      ts = new tmx::Tileset(e, this, documentPath, ts->tilesetPath, ts->firstgid);
-      ts->update_data();
-    }
-  }
+std::tuple<std::string, int, bool> Map::get_tileset_info(XMLElement* element){
+  bool errors = false;
+  const char* tsxPath;
+  int firstGID;
+  errors |= element->QueryAttribute("source", &tsxPath);
+  errors |= element->QueryAttribute("firstgid", &firstGID);
+  return {tsxPath, firstGID, errors};
 }
 }  // namespace tmx

@@ -13,13 +13,6 @@ ServerEndpoint serverEp("127.0.0.1", 12345);
 fs::path mapPath = get_home_dir().string() + std::string("/WorldWerksMaps/");
 tmx::MapParser mp;
 
-void read_file_to_storage(const char* file, std::string storageKey) {
-  std::ifstream t(file);
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  *LiveStorage::create_entry(storageKey) = buffer.str();
-}
-
 int main(int argc, char* argv[]) {
   std::error_code err;
   switch (argc) {
@@ -52,8 +45,11 @@ int main(int argc, char* argv[]) {
         exit(1);
       }
       LOGINF("Server", fmt::format("Loading map at '{}'.", mapPath.c_str()));
-      read_file_to_storage("/home/alba/WorldWerksMap/Background.tsx", "Background.tsx");
-      read_file_to_storage("/home/alba/WorldWerksMap/Tiles.tsx", "Tiles.tsx");
+      LiveStorage::useLocalFiles = true;
+      LiveStorage::read_file_to_storage("/home/alba/WorldWerksMap/Background.tsx",
+                                        "Background.tsx");
+      LiveStorage::read_file_to_storage("/home/alba/WorldWerksMap/Tiles.tsx",
+                                        "Tiles.tsx");
       mp.load_file(mapPath);
       // TODO: Open the file
       break;
@@ -72,10 +68,15 @@ int main(int argc, char* argv[]) {
       [](int clientFd, const std::string& _) {
         serverEp.send_single(clientFd, wwnet::RES_MAP, mp.get_data().c_str());
       });
-  serverEp.callbacks[wwnet::EMessageType::REQ_TSX].push_back(
-      [](int clientFd, const std::string& tsxPath) {
-        auto tsx = mp.get_tileset(tsxPath);
-        serverEp.send_single(clientFd, wwnet::RES_TSX, tsx->data.c_str());
+  serverEp.callbacks[wwnet::EMessageType::REQ_RES].push_back(
+      [](int clientfd, const std::string& key) {
+        std::string data;
+        if (!LiveStorage::retrieve(key, data)) {
+          LOGWRN("Server", "Client requested an unknown resource.");
+          return;
+        }
+        LiveDataCapsule cap{key, data};
+        serverEp.send_single(clientfd, wwnet::RES_RES, cap.to_msg());
       });
 
   for (int i = 0; i < 20; i++) {

@@ -36,6 +36,17 @@ class GameScene : public SceneBase {
     }
     client->callbacks[wwnet::EMessageType::RES_MAP].push_back(
         [this](const std::string& data) { this->load_map(data); });
+    client->callbacks[wwnet::EMessageType::RES_RES].push_back(
+        [](const std::string& data) {
+          LOGINF("GameScene", "Inserting received LiveData resource...");
+          LiveDataCapsule ldc;
+          ldc.from_msg(data);
+          LiveStorage::insert_data_capsule(ldc);
+        });
+    LiveStorage::missingResourceHandler = [client](auto s) {
+      LOGINF("GameScene", fmt::format("Requesting resource '{}'.", s));
+      client->request_resource(s);
+    };
     client->request_map();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     client->digest_incoming();
@@ -49,33 +60,20 @@ class GameScene : public SceneBase {
       return;
     }
     *str = mapData;
-    LOGINF("GameScene", "Added map entry to storage.");
+    LOGINF("GameScene", "Loading map data...");
     mp->load_text(mapData);
-    auto missingTilesetPaths = mp->get_missing_resource_paths();
-    LOGINF("GameScene", "Requesting missing tilesets...");
-    auto client = sceneContext->clientEp;
-    auto cb = [this](const std::string& tsxData) { receive_tsx_data(tsxData); };
-    client->callbacks[wwnet::EMessageType::RES_TSX].push_back(cb);
-    for (auto&& missingTilesetPath : missingTilesetPaths) {
-      LiveStorage::create_entry(missingTilesetPath);
-      client->request_tileset(missingTilesetPath);
-    }
-  }
-
-  void receive_tsx_data(const std::string& tsxData) {
-    sceneContext->mapParser->map->update_tileset_data(tsxData);
+    LOGINF("GameScene", "Loaded map data.");
   }
 
   void load_map(const std::string& mapData) {
     LOGINF("GameScene", "Loading map...");
     preload_map(mapData);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    sceneContext->clientEp->digest_incoming();
     sceneContext->mapParser = mp;
+    auto board = new Board(mp->map);
     auto res = sceneContext->resolution;
     auto uiSystem = sceneContext->uiSystem;
     auto boardWidget = uiSystem->create_widget<WBoard>(
-        uiSystem->get_root(), new Board(mp->map), SpriteLoader::getInstance(),
+        uiSystem->get_root(), board, SpriteLoader::getInstance(),
         sf::Vector2i{res.x, res.y});
   }
 

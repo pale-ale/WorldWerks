@@ -11,6 +11,7 @@ class WBoard : public UIElement {
 
  public:
   void display_token(Token *token);
+  void update_background();
   
   /** @brief WButton used to save the map */
   std::shared_ptr<WButton> saveButton;
@@ -24,6 +25,7 @@ class WBoard : public UIElement {
   void update_board_view();
   void set_scale(float newScale);
   void change_pan(int newX, int newY);
+  string get_bg_tileset_key();
   virtual bool event_clicked() override;
 
  private:

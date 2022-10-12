@@ -32,11 +32,11 @@ class DataNode : public DataChangeSource {
    * 
    * @param key The key used to search for the according data
    * @param data Where the data will be written to
-   * @return true on error, false otherwise
+   * @return true on success, false if data could not be fetched
    */
   virtual bool fetch_data(const std::string &key, std::string &data) {
     if (!parent) {
-      return true;
+      return false;
     }
     return parent->fetch_data(key, data);
   }

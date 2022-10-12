@@ -12,8 +12,8 @@ add_library (Data
 )
 
 add_library (TMXParser
-  3rdParty/tinyxml2.hpp MapParser/Map.hpp
-  3rdParty/tinyxml2.cpp MapParser/Map.cpp
+  3rdParty/tinyxml2.hpp MapParser/Map.hpp MapParser/Tileset.hpp
+  3rdParty/tinyxml2.cpp MapParser/Map.cpp MapParser/Tileset.cpp
 )
 
 add_library (UI
@@ -46,9 +46,10 @@ add_library (Util
   Util/Util.cpp
 )
 
-# add_library (Storage
-#   Storage/LiveStorage.hpp
-# )
+add_library (Storage
+  Storage/LiveStorage.hpp
+  Storage/LiveStorage.cpp
+)
 
 add_executable (client client_main.cpp)
 target_link_libraries(client 
@@ -56,7 +57,7 @@ target_link_libraries(client
   ${SpriteLoader}
   TMXParser UI 
   Server Client 
-  Util Tabletop Data
+  Util Tabletop Data Storage
   fmt
   sfml-graphics sfml-window sfml-system 
 )
@@ -65,7 +66,7 @@ add_executable (server server_main.cpp)
 target_link_libraries(server 
   TMXParser
   Server 
-  Util
+  Util Storage
   fmt
 )
 
@@ -73,7 +74,7 @@ add_executable(tests test.cpp)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain
   Util TMXParser UI 
   Server Client
-  Util Tabletop Data
+  Util Tabletop Data Storage
   fmt
   sfml-graphics sfml-window sfml-system
 )

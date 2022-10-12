@@ -18,43 +18,12 @@ struct Tileset : public DataNode {
       : DataNode(element, parent),
         mapPath{mapPath},
         relativeTilesetPath{tsxPath},
-        firstgid{firstGID} {}
-  virtual void commit_data() override {}
-  virtual void update_data() override {
-    LOGINF("Tileset", "Loading tileset data...");
-    // Open the tsx and read the tileset data.
-    tinyxml2::XMLDocument xmlDoc;
-    fileExists = !fetch_data(relativeTilesetPath, data);
-    if (!fileExists) {
-      LOGERR("Tileset", fmt::format("Error reading tileset at '{}': File does not exist.",
-                                    relativeTilesetPath.c_str()));
-    }
-    tilesetPath = mapPath.remove_filename() / relativeTilesetPath;
-
-    xmlDoc.Parse(data.c_str());
-    auto tilesetElement = xmlDoc.FirstChildElement();
-    bool errors = !tilesetElement;
-    if (tilesetElement) {
-      errors |= (bool)tilesetElement->QueryAttribute("tilewidth", &tilewidth);
-      errors |= (bool)tilesetElement->QueryAttribute("tileheight", &tileheight);
-      errors |= (bool)tilesetElement->QueryAttribute("tilecount", &tilecount);
-      errors |= (bool)tilesetElement->QueryAttribute("columns", &columns);
-      const char *cname;
-      errors |= (bool)tilesetElement->QueryAttribute("name", &cname);
-      name = cname;
-      auto imageNode = tilesetElement->FirstChildElement();
-      errors |= (bool)imageNode->QueryAttribute("source", &relativeImagePath);
-      auto tilesetFolder = std::filesystem::path(tilesetPath).remove_filename();
-      // TODO imagePath =
-      // std::filesystem::canonical(tilesetFolder.append(relativeImagePath));
-    }
-    if (errors) {
-      LOGERR("Tileset",
-             fmt::format("Errors in tileset file at '{}'.", imagePath.c_str()));
-      return;
-    }
-    LOGINF("Tileset", "Loaded successfully.");
+        firstgid{firstGID} {
+    update_data();
   }
+
+  virtual void commit_data() override {}
+  virtual void update_data() override;
 
   fs::path mapPath;
   std::string data;
@@ -63,13 +32,12 @@ struct Tileset : public DataNode {
 
   // Tileset info inside the tmx
   int firstgid;                 /** @brief The first id in the global map context */
-  fs::path relativeTilesetPath; /** @param Used to write the path back later */
+  fs::path relativeTilesetPath; /** @brief Used to write the path back later */
 
   // Tileset info inside the tsx
   int tilewidth, tileheight;     /** @brief Tile dimensions in Tiled units */
   int tilecount, columns;        /** @brief No. of tiles in each dimension */
   const char *relativeImagePath; /** @brief Relative path to the tileset's source image */
   std::string name;              /** @brief Name of this tileset */
-  std::string imagePath;         /** @brief Absolute path to the source image. */
 };
 }  // namespace tmx

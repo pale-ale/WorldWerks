@@ -1,20 +1,28 @@
 #pragma once
 #include <sstream>
 
-#include "IParseable.hpp"
+#include "../Data/DataNode.hpp"
 
 namespace tmx {
 /**
  * @brief Layers are built like a grid and contain Tiles.
  */
-struct Layer : IParseable {
-  virtual bool parse(tinyxml2::XMLElement* element) override {
+struct Layer : DataNode {
+  Layer(tinyxml2::XMLElement * element, DataNode * parent) : DataNode(element, parent) {}
+
+  virtual void update_data() override {
     bool errors = false;
     errors |= (bool)element->QueryAttribute("id", &id);
     errors |= (bool)element->QueryAttribute("width", &width);
     errors |= (bool)element->QueryAttribute("height", &height);
     errors |= (bool)element->QueryAttribute("name", &name);
     auto child = element->FirstChildElement("data");
+    errors |= child == nullptr;
+
+    if (errors){
+      LOGERR("Layer", "Could not read layer information.");
+      return;
+    }
 
     // Split data at ',' and insert into easy-to-use std::vector<int>
     std::string tileId;
@@ -22,8 +30,9 @@ struct Layer : IParseable {
     while (getline(dataStream, tileId, ',')) {
       data.push_back(std::stoi(tileId));
     }
-    return !errors;
   }
+
+  virtual void commit_data() {}
 
   /**
    * @brief Get the tileID of the tile at \a [x,y].

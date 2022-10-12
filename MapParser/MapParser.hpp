@@ -77,10 +77,10 @@ class MapParser {
     LOGDBG("MapParser", "Tilesets:");
     for (auto &&tileset : map->tilesets) {
       if (!tileset->fileExists) {
-        mrp.push_back(tileset->tilesetPath);
+        mrp.push_back(tileset->relativeTilesetPath);
       }
       LOGDBG("MapParser", fmt::format("\tTSX Name: '{}', Path: '{}', Exists: '{}'",
-                                      tileset->name.c_str(), tileset->tilesetPath.c_str(),
+                                      tileset->name.c_str(), tileset->relativeTilesetPath.c_str(),
                                       tileset->fileExists ? "Yes" : "No"));
     }
     return mrp;

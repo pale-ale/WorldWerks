@@ -45,16 +45,10 @@ struct Map : public DataNode {
       : DataNode(element), documentPath{documentPath} {}
   virtual void update_data() override;
   virtual void commit_data() override;
-  void update_tileset_data(const std::string& tsxData);
+  std::tuple<std::string, int, bool> get_tileset_info(XMLElement* element);
 
   virtual bool fetch_data(const std::string& key, std::string& data) override {
-    if (LiveStorage::storage.count(key) > 0) {
-      data = LiveStorage::storage[key];
-      return false;
-    }
-    LOGERR("Map",
-           fmt::format("Cannot fetch key \"{}\": Key does not exist.", key.c_str()));
-    return true;
+    return LiveStorage::retrieve(key, data);
   }
 
   /** @brief The width of the map in no. of tiles */

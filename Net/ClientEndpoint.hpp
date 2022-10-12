@@ -28,9 +28,9 @@ class ClientEndpoint {
   bool is_up() { return wwnet::is_socket_up(socketFd, "Client"); }
   void send_data(wwnet::EMessageType msgType, const char* data);
   bool request_map();
-  bool request_tileset(const std::string& resourcePath) {
-    LOGINF("Client", fmt::format("Requesting tileset '{}'...", resourcePath.c_str()));
-    send_data(wwnet::EMessageType::REQ_TSX, resourcePath.c_str());
+  bool request_resource(const std::string& resourcePath) {
+    LOGINF("Client", fmt::format("Requesting resource '{}'...", resourcePath.c_str()));
+    send_data(wwnet::EMessageType::REQ_RES, resourcePath.c_str());
     return true;
   }
   void digest_incoming();

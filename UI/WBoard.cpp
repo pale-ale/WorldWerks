@@ -7,11 +7,34 @@ constexpr float clamp(float a, float x, float b) { return std::min(std::max(a, x
 WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent, Board* board,
                SpriteLoader* spriteloader, const sf::Vector2i& size)
     : UIElement(uiSystem, parent, size), board{board} {
-  sf::Texture boardTexture;
+  LiveStorage::storage["Background.tsx"].updateListeners.push_back([this](auto s) {
+    LiveStorage::storage[get_bg_tileset_key()].updateListeners.push_back(
+        [this](auto s) { update_background(); });
+  });
+}
+
+string WBoard::get_bg_tileset_key() {
   for (auto&& tileset : board->get_map()->tilesets) {
     if (tileset->name == "Background") {
-      std::string path = tileset->imagePath;
-      boardTexture.loadFromFile(path);
+      return tileset->relativeImagePath;
+    }
+  }
+}
+
+void WBoard::update_background() {
+  sf::Texture boardTexture;
+  LOGINF("WBoard", "Loading background...");
+  for (auto&& tileset : board->get_map()->tilesets) {
+    if (tileset->name == "Background") {
+      std::string imageKey = tileset->relativeImagePath;
+      std::string imageData;
+      if (LiveStorage::get_state(imageKey) == EStorageElementState::REMOTE_READY) {
+        LiveStorage::retrieve(imageKey, imageData);
+        const char* rawData = imageData.c_str();
+        boardTexture.loadFromMemory(rawData, imageData.size() * sizeof(char));
+        LOGINF("WBoard", "Found background.");
+        break;
+      }
     }
   }
 
@@ -22,7 +45,7 @@ WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent, Board* boa
   rtex.display();
   texture = rtex.getTexture();
   sprite.setTexture(texture);
-  set_scale(1.0f);
+  set_scale(viewScale);
 }
 
 void WBoard::post_init() {

@@ -12,7 +12,7 @@
 
 #define MSG_LENGTH_BYTES 8
 #define MSG_TYPE_BYTES 4
-#define MAX_MSG_LOG_LEN 40
+#define MAX_MSG_LOG_LEN 35
 
 // this converts to string
 #define STR_(x) #x

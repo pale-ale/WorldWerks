@@ -99,7 +99,7 @@ bool ClientEndpoint::request_map() {
 }
 
 /**
- * @brief Process incoming messages form the server.
+ * @brief Process incoming messages from the server.
  *
  */
 void ClientEndpoint::digest_incoming() {

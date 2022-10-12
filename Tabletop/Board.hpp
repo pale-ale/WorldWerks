@@ -3,12 +3,13 @@
 #include <list>
 
 #include "../MapParser/Map.hpp"
+#include "../Data/DataChangeSource.hpp"
 #include "Token.hpp"
 
 /**
  * @brief Manages the different maps and facilitates switching between them.
  */
-class Board {
+class Board : public DataChangeSource {
  public:
   /**
    * @brief Construct a board and extract certain entities from the tmx::Map.

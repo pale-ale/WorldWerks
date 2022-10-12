@@ -13,10 +13,9 @@ namespace wwnet{
     
     REQ_MAP,    // Client requests the whole map
     RES_MAP,    // Server responds with the map data
-    REQ_TSX,    // Client requests a tileset
-    RES_TSX,    // Server responds with the tileset
-    REQ_IMG,    // Client requests an image
-    RES_IMG,    // Server responds with that image
+
+    REQ_RES,    // Client requests a resource, i.e. any file
+    RES_RES,    // Server responds with that resource
   };
 
   // TODO

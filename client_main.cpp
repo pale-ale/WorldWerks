@@ -50,6 +50,9 @@ int main() {
       inputManager.process_event(event, {(int)mp.x, (int)mp.y});
     }
     windowTexture.draw(sceneManager);
+    if (sceneManager.sceneContext.clientEp){
+      sceneManager.sceneContext.clientEp->digest_incoming();
+    }
     windowTexture.display();
     windowSprite.setTexture(windowTexture.getTexture());
     window.draw(windowSprite);
