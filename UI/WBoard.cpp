@@ -6,7 +6,7 @@ constexpr float clamp(float a, float x, float b) { return std::min(std::max(a, x
 
 WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent, Board* board,
                SpriteLoader* spriteloader, const sf::Vector2i& size)
-    : UIElement(uiSystem, parent, size), board{board} {
+    : UIElement(uiSystem, parent, "WBoard", size), board{board} {
   LiveStorage::storage["Background.tsx"].updateListeners.push_back([this](auto s) {
     LiveStorage::storage[get_bg_tileset_key()].updateListeners.push_back(
         [this](auto s) { update_background(); });
@@ -19,6 +19,8 @@ string WBoard::get_bg_tileset_key() {
       return tileset->relativeImagePath;
     }
   }
+  LOGWRN("Wboard", "Cannot find background tileset.");
+  return "";
 }
 
 void WBoard::update_background() {
@@ -125,9 +127,9 @@ void WBoard::update_board_view() {
   sprite.setScale(1 / viewScale, 1 / viewScale);
 }
 
-void WBoard::event_key_down(const sf::Event& keyEvent) {
+bool WBoard::event_key_down(const sf::Event& keyEvent) {
   if (!keyEvent.key.control) {
-    return;
+    return false;
   }
   switch (keyEvent.key.code) {
     case sf::Keyboard::Hyphen:
@@ -155,8 +157,9 @@ void WBoard::event_key_down(const sf::Event& keyEvent) {
       break;
 
     default:
-      break;
+      return false;
   }
+  return true;
 }
 
 /**

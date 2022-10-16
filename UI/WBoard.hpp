@@ -20,7 +20,7 @@ class WBoard : public UIElement {
   WBoard(UISystem *uiSystem, std::shared_ptr<UIElement> parent, Board *board,
          SpriteLoader *spriteloader, const sf::Vector2i &size);
   void post_init() override;
-  void event_key_down(const sf::Event &keyEvent) override;
+  bool event_key_down(const sf::Event &keyEvent) override;
   void update_tokens();
   void update_board_view();
   void set_scale(float newScale);

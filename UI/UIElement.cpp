@@ -1,10 +1,11 @@
 #include "UIElement.hpp"
 
+#include "../Util/Log.hpp"
 #include "UISystem.hpp"
 
 UIElement::UIElement(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
-                     sf::Vector2i size, sf::Vector2i pos)
-    : uiSystem{uiSystem}, parent{parent}, size{size}, relativePosition{pos} {
+                     std::string name, sf::Vector2i size, sf::Vector2i pos)
+    : uiSystem{uiSystem}, parent{parent}, name{name}, size{size}, relativePosition{pos} {
   auto tex = new sf::RenderTexture();
   tex->create(size.x, size.y);
   auto rs = sf::RectangleShape({(float)size.x, (float)size.y});
@@ -36,8 +37,10 @@ void UIElement::add_child(std::shared_ptr<UIElement> child,
  * @return false otherwise.
  */
 bool UIElement::is_mouse_inside(const sf::Vector2i &mousePos) {
-  int mx = mousePos.x, my = mousePos.y, px = relativePosition.x, py = relativePosition.y;
-  return px <= mx && mx <= px + size.x && py <= my && my <= py + size.y;
+  auto parentPos = get_parent_position();
+  int posx = parentPos.x + relativePosition.x, posy = parentPos.y + relativePosition.y;
+  int mx = mousePos.x, my = mousePos.y;
+  return posx <= mx && mx <= posx + size.x && posy <= my && my <= posy + size.y;
 };
 
 /**
@@ -62,7 +65,14 @@ const sf::Vector2i &UIElement::get_viewport_size() const {
  * @return false --- The event was not handled, allowing other widgets to receive it.
  */
 bool UIElement::on_event_received(const sf::Event &event, const sf::Vector2i &mousePos) {
+  for (auto child : children) {
+    if (child->on_event_received(event, mousePos)) {
+      return true;
+    }
+  }
   switch (event.type) {
+    // This event cannot be handled by any widget - everyone gets to know the mouse
+    // position.
     case sf::Event::MouseMoved:
       event_mouse_moved(mousePos);
       if (!bMouseOver && is_mouse_inside(mousePos)) {
@@ -75,60 +85,38 @@ bool UIElement::on_event_received(const sf::Event &event, const sf::Vector2i &mo
       }
       break;
 
+    // Handled by buttons etc.
     case sf::Event::MouseButtonPressed:
       if (event.mouseButton.button == sf::Mouse::Button::Left) {
-        /* To avoid clicking multiple buttons at once */
-        for (auto &&child : children) {
-          if (child->on_event_received(event, mousePos)) {
-            return true;
-          }
-        }
-        if (bMouseOver) {
-          bContinuouslyPressed = true;
-        }
-        if (event_mouse_down(mousePos)) {
-          return true;
-        }
+        if (bMouseOver) bContinuouslyPressed = true;
+        if (event_mouse_down(mousePos)) return true;
       }
       break;
 
     case sf::Event::MouseButtonReleased:
       if (event.mouseButton.button == sf::Mouse::Button::Left) {
         // To avoid triggering multiple releases at once
-        for (auto &&child : children) {
-          if (child->on_event_received(event, mousePos)) {
-            return true;
-          }
-        }
-
-        bool handled = false;
+        bool clickHandled = false;
         if (bMouseOver) {
           if (bContinuouslyPressed) {
-            bContinuouslyPressed = false;
-            handled = event_clicked();
+            clickHandled = event_clicked();
           }
-        } else {
-          bContinuouslyPressed = false;
         }
-
-        return handled | event_mouse_up(mousePos) | (bContinuouslyPressed && event_clicked());
+        bContinuouslyPressed = false;
+        return clickHandled | event_mouse_up(mousePos);
       }
       break;
 
-    case sf::Event::TextEntered:
-      event_text_input(event.text.unicode);
-
     case sf::Event::KeyPressed:
-      event_key_down(event);
+      if (event_key_down(event)) return true;
+      break;
+
+    case sf::Event::TextEntered:
+      if (event_text_input(event.text.unicode)) return true;
       break;
 
     default:
       break;
-  }
-  for (auto &&child : children) {
-    if (child->on_event_received(event, mousePos)) {
-      return true;
-    }
   }
   return false;
 }
@@ -186,3 +174,41 @@ void UIElement::event_position_updated() {
   auto pos = get_parent_position() + relativePosition;
   sprite.setPosition({(float)pos.x, (float)pos.y});
 }
+
+bool UIElement::remove_child(UIElement *child) {
+  return children.remove_if([child](auto e) { return e.get() == child; }) == 1;
+}
+
+/**
+ * @brief Remove this widget from the parent, effectively disabling and destroying it.
+ */
+void UIElement::remove_self() {
+  LOGDBG(name.c_str(), "Removing self...");
+  if (parent.expired()) {
+    LOGERR(name.c_str(), "Tried to remove widget from nonexistent parent.");
+    return;
+  }
+  if (!parent.lock()->remove_child(this)) {
+    LOGERR(name.c_str(), "Removed a number of widgets != 1.");
+  }
+}
+
+/**
+ * @brief Call the event functions for gain/loss of focus.
+ *
+ * @param newFocus Whether the widget is now focused or not
+ */
+void UIElement::update_focus(bool newFocus) {
+  if (newFocus) {
+    event_focus_gained();
+  } else {
+    event_focus_lost();
+  }
+}
+
+/**
+ * @brief Is this widget currently focused in the UISystem?
+ *
+ * @return true if widget is focused, false otherwise
+ */
+bool UIElement::has_focus() { return uiSystem->get_focused_widget() == this; }

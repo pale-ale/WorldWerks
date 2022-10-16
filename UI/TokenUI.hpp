@@ -3,9 +3,9 @@
 #include <SFML/Graphics.hpp>
 
 #include "../Tabletop/Token.hpp"
-#include "WTextbox.hpp"
 #include "UISystem.hpp"
 #include "WBar.hpp"
+#include "WTextbox.hpp"
 
 /**
  @brief Displays information about a token like it's name, properties, inventory, etc..
@@ -33,10 +33,10 @@ class TokenUI : public UIElement {
     sf::Vector2i hpPos(loffset, titlePos.y + titleSize.y);
     sf::Vector2i hpSize(width, 10);
     tokenTitle = uiSystem->create_widget<WTextbox>(
-        shared_from_this(), Binding<std::string>(), titleSize, titlePos);
-    tokenHitpoints = uiSystem->create_widget<WBar>(
-        shared_from_this(), GetterFn<int>(), GetterFn<int>(), sf::Color{255,0,0},
-        sf::Color{75, 0, 0}, hpSize, hpPos);
+        shared_from_this(), Binding<std::string>(), titleSize, titlePos, "TokenTitle");
+    tokenHitpoints = uiSystem->create_widget<WBar>(shared_from_this(), GetterFn<int>(),
+                                                   GetterFn<int>(), sf::Color{255, 0, 0},
+                                                   sf::Color{75, 0, 0}, hpSize, hpPos);
   }
 
   /** @brief The Token we are currently displaying */

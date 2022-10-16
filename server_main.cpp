@@ -87,4 +87,5 @@ int main(int argc, char* argv[]) {
     serverEp.digest_incoming();
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
+  serverEp.send_all(wwnet::EMessageType::KICKED, "Server shutting down...");
 }

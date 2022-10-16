@@ -9,8 +9,8 @@
 class WButton : public UIElement {
  public:
   WButton(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
-          sf::Vector2i size = {100, 100}, sf::Vector2i pos = {0,0})
-      : UIElement(uiSystem, parent, size, pos) {}
+          sf::Vector2i size = {100, 100}, sf::Vector2i pos = {0,0}, std::string name = "WButton")
+      : UIElement(uiSystem, parent, name, size, pos) {}
 
   virtual bool event_clicked() override {
     if (buttonClickCallback) {

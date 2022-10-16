@@ -13,6 +13,11 @@ class MainMenuScene : public SceneBase {
  public:
   MainMenuScene(SceneManager* sm, SceneContext* sceneContext);
   virtual void event_load_scene() override;
+  virtual void event_unload_scene() override{
+    ipTb->remove_self();
+    portTb->remove_self();
+    joinBtn->remove_self();
+  }
 
  protected:
   virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {

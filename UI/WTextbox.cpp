@@ -1,8 +1,11 @@
 #include "WTextbox.hpp"
 
+#include "UISystem.hpp"
+
 WTextbox::WTextbox(UISystem *uiSystem, std::shared_ptr<UIElement> parent,
-                   Binding<string> binding, sf::Vector2i size, sf::Vector2i pos)
-    : UIElement(uiSystem, parent, size, pos), binding{binding} {
+                   Binding<string> binding, sf::Vector2i size, sf::Vector2i pos,
+                   std::string name)
+    : UIElement(uiSystem, parent, name, size, pos), binding{binding} {
   font.loadFromFile("/home/alba/projects/WorldWerks/HighOne.ttf");
   rtex = std::make_shared<sf::RenderTexture>();
   rtex->create(size.x, size.y);
@@ -31,8 +34,8 @@ void WTextbox::redraw() {
   sprite.setTexture(rtex->getTexture());
 }
 
-void WTextbox::event_text_input(const char &input) {
-  if (bIsFocused && binding.get && binding.set) {
+bool WTextbox::event_text_input(const char &input) {
+  if (has_focus() && binding.get && binding.set) {
     auto str = binding.get();
     if (input == '\b') {
       if (str.length() > 0) str.pop_back();
@@ -41,5 +44,14 @@ void WTextbox::event_text_input(const char &input) {
     }
     binding.set(str);
     redraw();
+    return true;
   }
+  return false;
+}
+
+bool WTextbox::event_clicked() {
+  if (!has_focus()) {
+    uiSystem->request_focus(this);
+  }
+  return true;
 }

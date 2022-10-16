@@ -2,6 +2,7 @@
 #include "../MapParser/MapParser.hpp"
 #include "MainMenuScene.hpp"
 #include "SceneBase.hpp"
+#include "memory.h"
 
 /**
  * @brief The Scenemanager loads/unloads scenes.
@@ -18,7 +19,7 @@ class SceneManager : public sf::Drawable {
     if (currentScene) {
       currentScene->event_unload_scene();
     }
-    currentScene = new T(this, &sceneContext);
+    currentScene = std::make_unique<T>(this, &sceneContext);
     currentScene->event_load_scene();
   }
 
@@ -34,5 +35,5 @@ class SceneManager : public sf::Drawable {
 
  private:
   /** @brief The currently loaded scene */
-  SceneBase* currentScene = nullptr;
+  std::unique_ptr<SceneBase> currentScene = nullptr;
 };

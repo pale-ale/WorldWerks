@@ -18,3 +18,11 @@ TEST_CASE("Edit TextBox", "[EditTextbox]"){
     tb->event_text_input('\b');
     REQUIRE_THAT(text, Equals("tex"));
 }
+
+TEST_CASE("Mouse Inside", "[IsMouseInside]"){
+    auto ui = UISystem({400,400});
+    auto ele = ui.create_widget<UIElement>(ui.get_root(), "test_uielement", sf::Vector2i{10,10}, sf::Vector2i{10,10});
+    auto tb = ui.create_widget<WTextbox>(ele, Binding<std::string>{}, sf::Vector2i{10,10}, sf::Vector2i{10,10});
+    LOGDBG("", fmt::format("{},{}\n", tb->get_parent_position().x, tb->get_parent_position().y));
+    REQUIRE(tb->is_mouse_inside({25,25}));
+}

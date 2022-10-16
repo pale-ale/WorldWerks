@@ -14,7 +14,8 @@ class UIElement : public sf::Drawable, public std::enable_shared_from_this<UIEle
 
  protected:
   UIElement(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
-            sf::Vector2i size = {100, 100}, sf::Vector2i pos = {0, 0});
+            std::string name = "UIElement", sf::Vector2i size = {100, 100},
+            sf::Vector2i pos = {0, 0});
 
   /**
    * @brief Called after the constructor finished and allows shared_from_this().
@@ -23,8 +24,12 @@ class UIElement : public sf::Drawable, public std::enable_shared_from_this<UIEle
 
  public:
   void add_child(std::shared_ptr<UIElement> child, std::weak_ptr<UIElement> parent);
+  bool remove_child(UIElement *child);
+  void remove_self();
   void update_position(const sf::Vector2i &newRelativePosition);
   void update_position();
+  void update_focus(bool newFocus);
+  bool has_focus();
   virtual bool is_mouse_inside(const sf::Vector2i &mousePos);
   virtual bool on_event_received(const sf::Event &event, const sf::Vector2i &mousePos);
   sf::Vector2i get_parent_position() const;
@@ -66,10 +71,16 @@ class UIElement : public sf::Drawable, public std::enable_shared_from_this<UIEle
   virtual void event_mouse_moved(const sf::Vector2i &mousePos) {}
 
   /** @brief Called when a key was pressed. */
-  virtual void event_key_down(const sf::Event &keyEvent) {}
+  virtual bool event_key_down(const sf::Event &keyEvent) { return false; }
 
   /** @brief Called when a character was being typed */
-  virtual void event_text_input(const char &input) {}
+  virtual bool event_text_input(const char &input) { return false; }
+
+  /** @brief Called when this widget is focused */
+  virtual void event_focus_gained() {}
+
+  /** @brief Called when this widget is no longer focused */
+  virtual void event_focus_lost() {}
 
  protected:
   void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
@@ -82,7 +93,10 @@ class UIElement : public sf::Drawable, public std::enable_shared_from_this<UIEle
 
   /** @brief True if LMB was pressed over this widget and mouse did not leave. */
   bool bContinuouslyPressed = false;
-
+  
   /** @brief The UISystem is needed to create child widgets. */
   UISystem *uiSystem;
+
+  /** @brief Name of this widget, for easier logging */
+  std::string name;
 };

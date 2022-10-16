@@ -29,9 +29,9 @@ void MainMenuScene::event_load_scene() {
   Binding<std::string> portBinding{{[this]() { return this->port; }},
                                    {[this](std::string text) { this->port = text; }}};
 
-  ipTb = uiSys->create_widget<WTextbox>(root, ipBinding, ipSize, ipPos);
-  ipTb = uiSys->create_widget<WTextbox>(root, portBinding, portSize, portPos);
-  joinBtn = uiSys->create_widget<WButton>(root, joinSize, joinPos);
+  ipTb = uiSys->create_widget<WTextbox>(root, ipBinding, ipSize, ipPos, "IPBox");
+  portTb = uiSys->create_widget<WTextbox>(root, portBinding, portSize, portPos, "PortBox");
+  joinBtn = uiSys->create_widget<WButton>(root, joinSize, joinPos, "JoinButton");
   joinBtn->buttonClickCallback = [this]() { this->event_join_clicked(); };
   LOGINF("MainMenuScene", "Loaded.");
 }
@@ -42,6 +42,12 @@ void MainMenuScene::event_join_clicked() {
   sceneContext->clientEp = ep;
   if (ep->is_up() && ep->is_connected_and_buffer_empty()) {
     LOGINF("MainMenuScene", "Connected successfully.");
+    ep->callbacks[wwnet::EMessageType::KICKED].push_back(std::bind(
+        [](SceneManager* sm, auto s) {
+          LOGINF("MainMenuScene", fmt::format("Client kicked with message '{}'.", s));
+          sm->load_scene<MainMenuScene>();
+        },
+        this->sceneManager, std::placeholders::_1));
     sceneManager->load_scene<GameScene>();
   }
 }

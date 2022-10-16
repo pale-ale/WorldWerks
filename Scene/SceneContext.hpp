@@ -12,8 +12,8 @@ class ClientEndpoint;
 struct SceneContext {
  private:
   struct vec {
-    int x;
-    int y;
+    int x = 0;
+    int y = 0;
     operator sf::Vector2f() { return {(float)x, (float)y}; }
   };
 

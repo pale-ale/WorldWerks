@@ -16,6 +16,8 @@ namespace wwnet{
 
     REQ_RES,    // Client requests a resource, i.e. any file
     RES_RES,    // Server responds with that resource
+
+    KICKED,     //The client has been removed from the server's session
   };
 
   // TODO

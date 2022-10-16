@@ -4,7 +4,7 @@
 
 TokenUI::TokenUI(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
                  const sf::Vector2i &size)
-    : UIElement(uiSystem, parent, size) {
+    : UIElement(uiSystem, parent, "TokenUI", size) {
   background = new sf::RenderTexture();
   background->create(size.x, size.y);
   background->clear(bgColor);

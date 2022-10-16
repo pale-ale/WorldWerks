@@ -52,6 +52,8 @@ class GameScene : public SceneBase {
     client->digest_incoming();
   }
 
+  virtual void event_unload_scene() { boardWidget->remove_self(); }
+
   void preload_map(const std::string& mapData) {
     LOGINF("GameScene", "Pre-Loading map...");
     auto str = LiveStorage::create_entry("Map");
@@ -72,9 +74,9 @@ class GameScene : public SceneBase {
     auto board = new Board(mp->map);
     auto res = sceneContext->resolution;
     auto uiSystem = sceneContext->uiSystem;
-    auto boardWidget = uiSystem->create_widget<WBoard>(
-        uiSystem->get_root(), board, SpriteLoader::getInstance(),
-        sf::Vector2i{res.x, res.y});
+    boardWidget = uiSystem->create_widget<WBoard>(uiSystem->get_root(), board,
+                                                  SpriteLoader::getInstance(),
+                                                  sf::Vector2i{res.x, res.y});
   }
 
  protected:
@@ -83,5 +85,6 @@ class GameScene : public SceneBase {
   };
 
  private:
-  tmx::MapParser* mp;
+  tmx::MapParser* mp = nullptr;
+  std::shared_ptr<WBoard> boardWidget = nullptr;
 };

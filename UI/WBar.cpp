@@ -3,7 +3,7 @@
 WBar::WBar(UISystem* uiSystem, std::weak_ptr<UIElement> parentElement,
            GetterFn<int> current, GetterFn<int> max, const sf::Color& fillColor,
            const sf::Color& bgColor, const sf::Vector2i& size, const sf::Vector2i& pos)
-    : UIElement(uiSystem, parentElement, size, pos),
+    : UIElement(uiSystem, parentElement, "WBar", size, pos),
       current{current},
       max{max},
       fillColor{fillColor},
