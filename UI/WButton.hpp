@@ -18,6 +18,14 @@ class WButton : public UIElement {
     }
     return true;
   }
+
+  virtual void event_begin_mouse_over() override {
+    sprite.setColor({200,200,200});
+  }
+
+  virtual void event_end_mouse_over() override {
+    sprite.setColor({255,255,255});
+  }
   
   /**
    * @brief The functor to be called when this button is clicked.

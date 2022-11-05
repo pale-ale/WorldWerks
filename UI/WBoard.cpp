@@ -2,8 +2,6 @@
 
 #include "TokenUI.hpp"
 
-constexpr float clamp(float a, float x, float b) { return std::min(std::max(a, x), b); }
-
 WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent, Board* board,
                SpriteLoader* spriteloader, const sf::Vector2i& size)
     : UIElement(uiSystem, parent, "WBoard", size), board{board} {
@@ -23,6 +21,9 @@ string WBoard::get_bg_tileset_key() {
   return "";
 }
 
+/**
+ * @brief Reload the background from the map tileset.
+ */
 void WBoard::update_background() {
   sf::Texture boardTexture;
   LOGINF("WBoard", "Loading background...");
@@ -62,6 +63,13 @@ void WBoard::post_init() {
   saveButton->buttonClickCallback = [this] {
     LOGWRN("WBoard", "Save button not bound.");
   };
+  toolbar = uiSystem->create_widget<WToolbar>(shared_from_this());
+  auto gridBtn = uiSystem->create_widget<WButton>(toolbar, sf::Vector2i(30, 30));
+  toolbar->set_tools(std::vector<std::shared_ptr<UIElement>>{
+      uiSystem->create_widget<WDistanceTool>(toolbar),
+      gridBtn
+  });
+  gridBtn->buttonClickCallback = [this](){this->set_draw_grid(!bDrawGrid);};
 }
 
 /**
@@ -115,9 +123,9 @@ void WBoard::update_board_view() {
   mapTextureRect.height = scaledH;
   // Adjust the desired pan to be compatible with the offset.
   desiredPan.x =
-      clamp(-zoomPanOffset.x, desiredPan.x, boardW - scaledW - zoomPanOffset.x);
+      std::clamp(-zoomPanOffset.x, desiredPan.x, boardW - scaledW - zoomPanOffset.x);
   desiredPan.y =
-      clamp(-zoomPanOffset.y, desiredPan.y, boardH - scaledH - zoomPanOffset.y);
+      std::clamp(-zoomPanOffset.y, desiredPan.y, boardH - scaledH - zoomPanOffset.y);
   // Apply the pan to the texture rect.
   mapTextureRect.left = desiredPan.x + zoomPanOffset.x;
   mapTextureRect.top = desiredPan.y + zoomPanOffset.y;
@@ -125,12 +133,24 @@ void WBoard::update_board_view() {
   sprite.setTextureRect(mapTextureRect);
   // Scale up the sprite to fill the screen instead of just being smaller
   sprite.setScale(1 / viewScale, 1 / viewScale);
+
+  // Draw the grid lines
+  int squareSize = 25 * (1 / viewScale);
+  int lineCountX = (boardW / squareSize) + 2; // +2 for panning
+  int lineCountY = (boardH / squareSize) + 2;
+  grid.setLineCount({lineCountX+2, lineCountY+2});
+  grid.setLineSpace({squareSize, squareSize});
+  auto scaledPan = desiredPan;
+  int gridOffsetX = (scaledPan.x + zoomPanOffset.x) % squareSize;
+  int gridOffsetY = (scaledPan.y + zoomPanOffset.y) % squareSize;
+  grid.offset = -sf::Vector2f(gridOffsetX, gridOffsetY) / viewScale;
 }
 
 bool WBoard::event_key_down(const sf::Event& keyEvent) {
   if (!keyEvent.key.control) {
     return false;
   }
+  int panStep = 1;
   switch (keyEvent.key.code) {
     case sf::Keyboard::Hyphen:
       set_scale(viewScale * 2);
@@ -141,19 +161,19 @@ bool WBoard::event_key_down(const sf::Event& keyEvent) {
       break;
 
     case sf::Keyboard::Up:
-      change_pan(0, -10 / viewScale);
+      change_pan(0, -panStep / viewScale);
       break;
 
     case sf::Keyboard::Down:
-      change_pan(0, 10 / viewScale);
+      change_pan(0, panStep / viewScale);
       break;
 
     case sf::Keyboard::Left:
-      change_pan(-10 / viewScale, 0);
+      change_pan(-panStep / viewScale, 0);
       break;
 
     case sf::Keyboard::Right:
-      change_pan(10 / viewScale, 0);
+      change_pan(panStep / viewScale, 0);
       break;
 
     default:
@@ -175,12 +195,29 @@ void WBoard::change_pan(int dx, int dy) {
 }
 
 /**
+ * @brief Enable/Disable the grid
+ * 
+ * @param draw If true, enables the grid. Otherwise disables it
+ */
+void WBoard::set_draw_grid(bool draw) {
+  bDrawGrid = draw;
+  update_board_view();
+}
+
+/**
  * @brief Set the zoom of the map. 1 = Zoomed out. Use powers of 2, e.g. 0.25.
  *
  * @param newScale The new scale of the map between 0 and 1
  */
 void WBoard::set_scale(float newScale) {
-  viewScale = clamp(minScale, newScale, maxScale);
+  viewScale = std::clamp(minScale, newScale, maxScale);
   LOGDBG("WBoard", fmt::format("Scale is now {}.", viewScale));
   update_board_view();
+}
+
+void WBoard::draw(sf::RenderTarget& target, sf::RenderStates states) const {
+  UIElement::draw(target, states);
+  if (bDrawGrid){
+    target.draw(grid, states);
+  }
 }

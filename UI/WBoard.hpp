@@ -5,6 +5,9 @@
 #include "UIElement.hpp"
 #include "UISystem.hpp"
 #include "WToken.hpp"
+#include "Toolbar/WToolbar.hpp"
+#include "Toolbar/WDistanceTool.hpp"
+#include "SemiPrimitives/Grid.hpp"
 
 class WBoard : public UIElement {
   friend UISystem;
@@ -25,12 +28,17 @@ class WBoard : public UIElement {
   void update_board_view();
   void set_scale(float newScale);
   void change_pan(int newX, int newY);
+  void set_draw_grid(bool draw);
   string get_bg_tileset_key();
   virtual bool event_clicked() override;
+  virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
  private:
   /** @brief UIElement used to display the Token's information */
   std::shared_ptr<TokenUI> tokenUI;
+
+  /** @brief Displays a set of tools available on the map */
+  std::shared_ptr<WToolbar> toolbar;
 
   /** @brief The final texture of the board, with zoom and pan applied */
   sf::Texture texture;
@@ -49,4 +57,10 @@ class WBoard : public UIElement {
 
   /** @brief Pan requested by the user, adjusted each frame to fit inside the map */
   sf::Vector2i desiredPan = {0, 0};
+
+  /** @brief Should grid lines be drawn? **/
+  bool bDrawGrid = false;
+  
+  /** @brief The grid lines **/
+  GridSemiPrimitive grid;
 };

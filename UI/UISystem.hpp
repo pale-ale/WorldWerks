@@ -32,7 +32,7 @@ class UISystem : public sf::Drawable {
         std::shared_ptr<C>(new C(this, parent, args...));
     newWidget->post_init();
     if (parent) {
-      parent->add_child(newWidget, parent);
+      parent->add_child(newWidget);
     }
     return std::dynamic_pointer_cast<C>(newWidget);
   };

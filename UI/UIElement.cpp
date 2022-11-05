@@ -20,13 +20,15 @@ UIElement::UIElement(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
  * @brief Adds a child to the widget tree.
  *
  * @param child The child to add.
- * @param parent Who this child will be the child of, i.e. who it inherits the positoin
- * and events from.
  */
-void UIElement::add_child(std::shared_ptr<UIElement> child,
-                          std::weak_ptr<UIElement> parent) {
+void UIElement::add_child(std::shared_ptr<UIElement> child) {
+  auto start = children.begin(), end = children.end();
+  if (std::find(start, end, child) != end){
+    LOGERR(name.c_str(), fmt::format("Cannot add UIElement '{}': already a child.", child->name));
+    return;
+  }
   children.push_back(child);
-  child->parent = parent;
+  child->parent = shared_from_this();
 }
 
 /**

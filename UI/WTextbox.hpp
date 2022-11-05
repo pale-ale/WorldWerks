@@ -14,7 +14,7 @@ using std::string;
 class WTextbox : public UIElement {
  public:
   WTextbox(UISystem *uiSystem, std::shared_ptr<UIElement> parent, Binding<string> binding,
-           sf::Vector2i size, sf::Vector2i pos, std::string name = "WTextbox");
+           sf::Vector2i size = {100,50}, sf::Vector2i pos = {0,0}, std::string name = "WTextbox");
   void redraw();
   void set_text_binding(Binding<string> newBinding);
   virtual bool event_text_input(const char &input) override;

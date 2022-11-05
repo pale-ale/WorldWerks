@@ -23,7 +23,7 @@ class UIElement : public sf::Drawable, public std::enable_shared_from_this<UIEle
   virtual void post_init(){};
 
  public:
-  void add_child(std::shared_ptr<UIElement> child, std::weak_ptr<UIElement> parent);
+  void add_child(std::shared_ptr<UIElement> child);
   bool remove_child(UIElement *child);
   void remove_self();
   void update_position(const sf::Vector2i &newRelativePosition);
