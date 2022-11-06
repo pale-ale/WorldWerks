@@ -9,6 +9,6 @@ using SetterFn = std::function<void(const T &)>;
 
 template <typename T>
 struct Binding {
-  GetterFn<T> get;
-  SetterFn<T> set;
+  GetterFn<T> get = nullptr;
+  SetterFn<T> set = nullptr;
 };

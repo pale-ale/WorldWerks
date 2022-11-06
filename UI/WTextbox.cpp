@@ -13,7 +13,7 @@ WTextbox::WTextbox(UISystem *uiSystem, std::shared_ptr<UIElement> parent,
 }
 
 /**
- * @brief Set a new getter/setter to read/write the contents of the textbox.
+ * @brief Set a new getter/setter to read/write the contents of the textbox and redraw it.
  *
  * @param newBinding The new binding to use.
  */
@@ -27,9 +27,18 @@ void WTextbox::set_text_binding(Binding<string> newBinding) {
  */
 void WTextbox::redraw() {
   textImage = sf::Text(binding.get ? binding.get().c_str() : "", font, 16);
-  textImage.setFillColor(sf::Color::White);
-  rtex->clear(sf::Color(50, 60, 70));
-  rtex->draw(textImage);
+  textImage.setFillColor(textColor);
+  rtex->clear(bgColor);
+  sf::RenderStates states;
+  int y = 1;
+  int x = 0;
+  if (textPosition == POSITION_CENTER) {
+    x = (size.x - textImage.getGlobalBounds().width) / 2;
+  } else if (textPosition == POSITION_RIGHT) {
+    x = size.x - textImage.getGlobalBounds().width;
+  }
+  states.transform.translate(x, y);
+  rtex->draw(textImage, states);
   rtex->display();
   sprite.setTexture(rtex->getTexture());
 }
@@ -50,6 +59,9 @@ bool WTextbox::event_text_input(const char &input) {
 }
 
 bool WTextbox::event_clicked() {
+  if (!binding.set) {
+    return false;
+  }
   if (!has_focus()) {
     uiSystem->request_focus(this);
   }

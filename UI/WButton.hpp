@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UIElement.hpp"
+#include "WTextbox.hpp"
 
 /**
  * @brief Base class for easy click event callback triggers.
@@ -11,6 +12,10 @@ class WButton : public UIElement {
   WButton(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
           sf::Vector2i size = {100, 100}, sf::Vector2i pos = {0,0}, std::string name = "WButton")
       : UIElement(uiSystem, parent, name, size, pos) {}
+
+  void set_text(const std::string& newText);
+
+  virtual void post_init() override;
 
   virtual bool event_clicked() override {
     if (buttonClickCallback) {
@@ -31,4 +36,5 @@ class WButton : public UIElement {
    * @brief The functor to be called when this button is clicked.
    */
   std::function<void()> buttonClickCallback;
+  std::weak_ptr<WTextbox> text;
 };

@@ -12,10 +12,14 @@ class WDistanceTool : public WTool {
     WTool::post_init();
     line = std::make_unique<WLine>(sf::Vector2i{0, 0}, sf::Vector2i{0, 0}, sf::Color::Red,
                                    sf::Color::White);
-    Binding<string> distanceBinding(
-        [this]() { return std::to_string(distance(line->base, line->tip)); });
+    Binding<string> distanceBinding([this]() {
+      auto s = std::to_string(std::round(distance(line->base, line->tip) * 100) / 100);
+      return s.substr(0, s.find('.') + 3);
+    });
     textbox = std::make_unique<WTextbox>(uiSystem, shared_from_this(), distanceBinding,
                                          sf::Vector2i{50, 20});
+    textbox->bgColor = sf::Color::Transparent;
+    textbox->textColor = sf::Color::Black;
   }
 
   virtual bool event_clicked() override {

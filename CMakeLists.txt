@@ -17,8 +17,8 @@ add_library (TMXParser
 )
 
 add_library (UI
-  UI/WBoard.hpp UI/WToken.hpp UI/UIElement.hpp UI/TokenUI.hpp UI/InputManager.hpp UI/UISystem.hpp UI/WTextbox.hpp UI/WBar.hpp
-  UI/WBoard.cpp UI/WToken.cpp UI/UIElement.cpp UI/TokenUI.cpp UI/InputManager.cpp UI/UISystem.cpp UI/WTextbox.cpp UI/WBar.cpp
+  UI/WBoard.hpp UI/WToken.hpp UI/UIElement.hpp UI/TokenUI.hpp UI/InputManager.hpp UI/UISystem.hpp UI/WTextbox.hpp UI/WBar.hpp UI/WButton.hpp
+  UI/WBoard.cpp UI/WToken.cpp UI/UIElement.cpp UI/TokenUI.cpp UI/InputManager.cpp UI/UISystem.cpp UI/WTextbox.cpp UI/WBar.cpp UI/WButton.cpp
 )
 
 add_library (Tabletop

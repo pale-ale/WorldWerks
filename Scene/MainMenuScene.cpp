@@ -33,6 +33,7 @@ void MainMenuScene::event_load_scene() {
   portTb = uiSys->create_widget<WTextbox>(root, portBinding, portSize, portPos, "PortBox");
   joinBtn = uiSys->create_widget<WButton>(root, joinSize, joinPos, "JoinButton");
   joinBtn->buttonClickCallback = [this]() { this->event_join_clicked(); };
+  joinBtn->text.lock()->set_text_binding({[](){return "Join";}});
   LOGINF("MainMenuScene", "Loaded.");
 }
 
