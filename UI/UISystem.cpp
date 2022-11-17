@@ -37,6 +37,6 @@ void UISystem::event_callback(const sf::Event &event, const sf::Vector2i &mouseP
  */
 void UISystem::draw(sf::RenderTarget &target, sf::RenderStates states) const {
   if (root) {
-    target.draw(*root);
+    target.draw(*root, states);
   }
 }

@@ -130,9 +130,9 @@ bool UIElement::on_event_received(const sf::Event &event, const sf::Vector2i &mo
  * @param states Contains shaders, blend functions, masks
  */
 void UIElement::draw(sf::RenderTarget &target, sf::RenderStates states) const {
-  target.draw(sprite);
+  target.draw(sprite, states);
   for (auto &&child : children) {
-    target.draw(*child);
+    target.draw(*child, states);
   }
 };
 

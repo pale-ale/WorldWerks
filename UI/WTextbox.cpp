@@ -30,7 +30,9 @@ void WTextbox::redraw() {
   textImage.setFillColor(textColor);
   rtex->clear(bgColor);
   sf::RenderStates states;
-  int y = 1;
+  /// @brief SFML seems to calculate sf::texts' height as twice it's actual height
+  int y = (size.y - textImage.getLocalBounds().height + 1) / 2 -
+          textImage.getLocalBounds().height;
   int x = 0;
   if (textPosition == POSITION_CENTER) {
     x = (size.x - textImage.getGlobalBounds().width) / 2;
