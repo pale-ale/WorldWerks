@@ -1,4 +1,5 @@
 #include "LiveStorage.hpp"
+
 #include "../3rdParty/base64.h"
 
 /**
@@ -6,16 +7,16 @@
  *
  * @return const char* --- The data in the form of an xml string
  */
-const char* LiveDataCapsule::to_msg() {
+string LiveDataCapsule::to_msg() {
   tinyxml2::XMLDocument doc;
   auto elem = doc.NewElement("FileData");
   elem->SetAttribute("Key", key.c_str());
   std::string&& encoded = macaron::Base64::Encode(data).c_str();
   elem->SetAttribute("Data", encoded.c_str());
   doc.InsertFirstChild(elem);
-  auto printer = new tinyxml2::XMLPrinter();
-  doc.Print(printer);
-  return printer->CStr();
+  tinyxml2::XMLPrinter printer;
+  doc.Print(&printer);
+  return printer.CStr();
 }
 
 /**
@@ -80,20 +81,29 @@ string* LiveStorage::create_entry(const string& key, EStorageElementState state,
 void LiveStorage::read_file_to_storage(const char* file, const std::string& storageKey) {
   LOGINF("Storage", fmt::format("Reading file '{}' to '{}'.", file, storageKey));
   std::ifstream t(file);
+  if (!t.good()) {
+    LOGERR("Storage", fmt::format("File '{}' cannot be read.", file));
+    return;
+  }
   std::stringstream buffer;
   buffer << t.rdbuf();
-  *LiveStorage::create_entry(storageKey, EStorageElementState::LOCAL_READY) =
-      buffer.str();
+  if (!key_exists(storageKey)) {
+    LiveStorage::create_entry(storageKey);
+  }
+  auto&& [data, state, _] = LiveStorage::storage[storageKey];
+  data = buffer.str();
+  state = EStorageElementState::LOCAL_READY;
 }
 
-void LiveStorage::request_resource_update(const std::string& storageKey){
-  if (key_exists(storageKey) && missingResourceHandler){
+void LiveStorage::request_resource_update(const std::string& storageKey) {
+  if (key_exists(storageKey) && missingResourceHandler) {
     missingResourceHandler(storageKey);
   } else {
-    LOGERR("LiveStorage", fmt::format("Requested update of resource '{}' which does not exist.", storageKey));
+    LOGERR("LiveStorage",
+           fmt::format("Requested update of resource '{}' which does not exist.",
+                       storageKey));
   }
 }
-
 
 /**
  * @brief Add the key and data of a LiveDataCapsule into storage.
@@ -134,18 +144,23 @@ bool LiveStorage::retrieve(const string& key, string& outData) {
   }
   auto&& [data, state, _] = storage[key];
   switch (state) {
-    case EStorageElementState::MISSING:
-      if (missingResourceHandler) {
-        LOGWRN("LiveStorage", fmt::format("Requesting '{}' from the server.", key));
-        missingResourceHandler(key);
-        state = EStorageElementState::REMOTE_REQUESTED;
-      }
-      /* Request the storage element from the server. */
-      break;
-
     case EStorageElementState::REMOTE_REQUESTED:
       /* Do nothing; wait for it to be received. */
       break;
+
+    case EStorageElementState::MISSING:
+      if (missingResourceHandler) {
+        LOGWRN("LiveStorage",
+               fmt::format("Trying to discover missing resource '{}'.", key));
+        state = missingResourceHandler(key);
+        // no break intended
+      } else {
+        LOGWRN("LiveStorage",
+               fmt::format(
+                   "Requested '{}' which is not loaded and without a resource handler.",
+                   key));
+        break;
+      }
 
     case EStorageElementState::REMOTE_READY:
     case EStorageElementState::LOCAL_READY:

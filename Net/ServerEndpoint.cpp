@@ -68,9 +68,7 @@ PlayerConnection ServerEndpoint::accept_connection() {
         fmt::format("Could not set accepted connection to non-blocking mode: {}", errno));
     exit(1);
   }
-  LOGERR("Server", fmt::format("Connection accepted."));
-  // close(pc.clientFd);
-  // shutdown(serverFd, SHUT_RDWR);
+  LOGINF("Server", fmt::format("Connection accepted."));
   return pc;
 }
 

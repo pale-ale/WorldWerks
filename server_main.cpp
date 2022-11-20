@@ -46,12 +46,11 @@ int main(int argc, char* argv[]) {
       }
       LOGINF("Server", fmt::format("Loading map at '{}'.", mapPath.c_str()));
       LiveStorage::useLocalFiles = true;
-      LiveStorage::read_file_to_storage("/home/alba/WorldWerksMap/Background.tsx",
-                                        "Background.tsx");
-      LiveStorage::read_file_to_storage("/home/alba/WorldWerksMap/Tiles.tsx",
-                                        "Tiles.tsx");
+      LiveStorage::missingResourceHandler = [](auto srcName){
+        LiveStorage::read_file_to_storage((mapPath.remove_filename() / srcName).c_str(), srcName);
+        return EStorageElementState::LOCAL_READY;
+      };
       mp.load_file(mapPath);
-      // TODO: Open the file
       break;
     }
 
@@ -76,7 +75,7 @@ int main(int argc, char* argv[]) {
           return;
         }
         LiveDataCapsule cap{key, data};
-        serverEp.send_single(clientfd, wwnet::RES_RES, cap.to_msg());
+        serverEp.send_single(clientfd, wwnet::RES_RES, cap.to_msg().c_str());
       });
 
   for (int i = 0; i < 20; i++) {

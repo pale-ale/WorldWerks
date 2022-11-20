@@ -19,15 +19,4 @@ namespace wwnet{
 
     KICKED,     //The client has been removed from the server's session
   };
-
-  // TODO
-  template <typename T>
-  T parse_message(const char *msg){
-
-  }
-
-  //TODO
-  struct JoinRequest{
-
-  };
 };

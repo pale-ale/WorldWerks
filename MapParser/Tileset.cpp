@@ -9,12 +9,9 @@ void tmx::Tileset::update_data() {
     if (!LiveStorage::key_exists(relativeTilesetPath)){
       LOGINF("Tileset", fmt::format("Creating key for tileset '{}'.", relativeTilesetPath.c_str()));
       LiveStorage::create_entry(relativeTilesetPath, EStorageElementState::MISSING, {reloadFunc});
-      LOGINF("Tileset", fmt::format("Requesting tileset '{}'...", relativeTilesetPath.c_str()));
-      LiveStorage::retrieve(relativeTilesetPath, data);
-      return;
     }
     if (!LiveStorage::retrieve(relativeTilesetPath, data)){
-      LOGINF("Tileset", fmt::format("Tileset key exists but data missing: '{}'.",
+      LOGINF("Tileset", fmt::format("Tileset data is missing: '{}'.",
                                     relativeTilesetPath.c_str()));
       return;
     }

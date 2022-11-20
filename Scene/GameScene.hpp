@@ -46,6 +46,7 @@ class GameScene : public SceneBase {
     LiveStorage::missingResourceHandler = [client](auto s) {
       LOGINF("GameScene", fmt::format("Requesting resource '{}'.", s));
       client->request_resource(s);
+      return EStorageElementState::REMOTE_REQUESTED;
     };
     client->request_map();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
