@@ -10,7 +10,7 @@ void Map::update_data() {
   get_attribute("nextlayerid", &nextlayerid, true, "int");
   get_attribute("nextobjectid", &nextobjectid, true, "int");
 
-  for (auto&& child = element->FirstChildElement(); child;
+  for (auto&& child = nodeData->element->FirstChildElement(); child;
        child = child->NextSiblingElement()) {
     auto type = NodeNameTypeMap.find(std::string(child->Name()));
     if (type == NodeNameTypeMap.end()) {
@@ -26,25 +26,29 @@ void Map::update_data() {
           LOGERR("Map", "Error constructing tileset.");
           break;
         }
-        tilesets.push_back(new Tileset(nullptr, this, documentPath, tilesetPath, firstgid));
+        tilesets.push_back(std::make_unique<Tileset>(nullptr, this, documentPath, tilesetPath, firstgid));
+        children.push_back(tilesets.rbegin()->get());
         break;
       }
 
       case ENodeType::Layer: {
         Layer* layer = new Layer(child, this);
         layer->update_data();
-        layers.push_back(layer);
+        layers.push_back(std::unique_ptr<Layer>(layer));
+        children.push_back(layer);
         break;
       }
 
       case ENodeType::ObjectGroup: {
         ObjectGroup* group = new ObjectGroup(child, this);
         group->update_data();
-        objectGroups.push_back(group);
+        objectGroups.push_back(std::unique_ptr<ObjectGroup>(group));
+        children.push_back(group);
         break;
       }
 
       default:
+        LOGERR("Map", "Unknown map element type. Ignoring...");
         break;
     }
   }

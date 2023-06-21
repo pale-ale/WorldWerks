@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
 
-#include "../Util/Log.hpp"
+#include "../TooDeeEngine/Scene/SceneBase.hpp"
+#include "../TooDeeEngine/Util/Log.hpp"
 #include "GameScene.hpp"
-#include "SceneBase.hpp"
 
 /**
  * @brief The scene shown at the game's startup.
@@ -13,7 +13,7 @@ class MainMenuScene : public SceneBase {
  public:
   MainMenuScene(SceneManager* sm, SceneContext* sceneContext);
   virtual void event_load_scene() override;
-  virtual void event_unload_scene() override{
+  virtual void event_unload_scene() override {
     ipTb->remove_self();
     portTb->remove_self();
     joinBtn->remove_self();

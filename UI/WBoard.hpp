@@ -1,27 +1,24 @@
 #pragma once
 
 #include "../Tabletop/Board.hpp"
-#include "TokenUI.hpp"
-#include "UIElement.hpp"
-#include "UISystem.hpp"
-#include "WToken.hpp"
-#include "Toolbar/WToolbar.hpp"
-#include "Toolbar/WDistanceTool.hpp"
+#include "../TooDeeEngine/UI/UIElement.hpp"
+#include "../TooDeeEngine/UI/UISystem.hpp"
 #include "SemiPrimitives/Grid.hpp"
+#include "TokenUI.hpp"
+#include "Toolbar/WDistanceTool.hpp"
+#include "Toolbar/WToolbar.hpp"
+#include "UIComponents/WToken.hpp"
 
-class WBoard : public UIElement {
-  friend UISystem;
-
+class WBoard : public UIElement {  
  public:
+  WBoard(UISystem *uiSystem, std::weak_ptr<UIElement> parent, Board* board, const sf::Vector2i &size);
   void display_token(Token *token);
   void update_background();
-  
+
   /** @brief WButton used to save the map */
   std::shared_ptr<WButton> saveButton;
 
  protected:
-  WBoard(UISystem *uiSystem, std::shared_ptr<UIElement> parent, Board *board,
-         SpriteLoader *spriteloader, const sf::Vector2i &size);
   void post_init() override;
   bool event_key_down(const sf::Event &keyEvent) override;
   void update_tokens();
@@ -41,7 +38,7 @@ class WBoard : public UIElement {
   std::shared_ptr<WToolbar> toolbar;
 
   /** @brief Keep references to the token widgets */
-  std::vector<WToken*> tokens;
+  std::vector<TokenUIComponent *> tokens;
 
   /** @brief The image used as the background prior to scaling */
   sf::Image boardImage;
@@ -66,7 +63,7 @@ class WBoard : public UIElement {
 
   /** @brief Should grid lines be drawn? **/
   bool bDrawGrid = false;
-  
+
   /** @brief The grid lines **/
   GridSemiPrimitive grid;
 };

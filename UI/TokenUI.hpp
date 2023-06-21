@@ -3,9 +3,9 @@
 #include <SFML/Graphics.hpp>
 
 #include "../Tabletop/Token.hpp"
-#include "UISystem.hpp"
-#include "WBar.hpp"
-#include "WTextbox.hpp"
+#include "../TooDeeEngine/UI/UISystem.hpp"
+#include "../TooDeeEngine/UI/WBar.hpp"
+#include "../TooDeeEngine/UI/WTextbox.hpp"
 
 /**
  @brief Displays information about a token like it's name, properties, inventory, etc..

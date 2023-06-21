@@ -4,13 +4,13 @@
 #include <thread>
 
 #include "../MapParser/MapParser.hpp"
-#include "../Net/ClientEndpoint.hpp"
-#include "../Net/Proto/Protocol.hpp"
-#include "../Storage/LiveStorage.hpp"
 #include "../Tabletop/Board.hpp"
+#include "../TooDeeEngine/Net/ClientEndpoint.hpp"
+#include "../TooDeeEngine/Net/Proto/Protocol.hpp"
+#include "../TooDeeEngine/Scene/SceneBase.hpp"
+#include "../TooDeeEngine/Storage/LiveStorage.hpp"
+#include "../TooDeeEngine/Util/Log.hpp"
 #include "../UI/WBoard.hpp"
-#include "../Util/Log.hpp"
-#include "SceneBase.hpp"
 
 /**
  * @brief The scene which contains the main game view.
@@ -49,8 +49,6 @@ class GameScene : public SceneBase {
       return EStorageElementState::REMOTE_REQUESTED;
     };
     client->request_map();
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    client->digest_incoming();
   }
 
   virtual void event_unload_scene() { boardWidget->remove_self(); }
@@ -72,12 +70,17 @@ class GameScene : public SceneBase {
     LOGINF("GameScene", "Loading map...");
     preload_map(mapData);
     sceneContext->mapParser = mp;
-    auto board = new Board(mp->map);
+    auto board = spawn_gamepiece<Board>(mp->map.get());
+    board->mapDataChangedCallback = [this](DataChangeSource* dataChangeSource) {
+      auto obj = (tmx::Object*)dataChangeSource;
+      auto hierarchy = obj->get_hierarchy();
+      std::ostringstream s;
+      std::copy(hierarchy.begin(), hierarchy.end(),
+                std::ostream_iterator<size_t>(s, " "));
+    };
     auto res = sceneContext->resolution;
     auto uiSystem = sceneContext->uiSystem;
-    boardWidget = uiSystem->create_widget<WBoard>(uiSystem->get_root(), board,
-                                                  SpriteLoader::getInstance(),
-                                                  sf::Vector2i{res.x, res.y});
+    boardWidget = uiSystem->create_widget<WBoard>(uiSystem->get_root(), board, sf::Vector2i{res.x, res.y});
   }
 
  protected:

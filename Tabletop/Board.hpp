@@ -4,19 +4,20 @@
 
 #include "../MapParser/Map.hpp"
 #include "../Data/DataChangeSource.hpp"
+#include "../TooDeeEngine/Scene/SceneBase.hpp"
 #include "Token.hpp"
 
 /**
  * @brief Manages the different maps and facilitates switching between them.
  */
-class Board : public DataChangeSource {
+class Board : public GamePiece {
  public:
   /**
    * @brief Construct a board and extract certain entities from the tmx::Map.
    *
    * @param map Contains info like backgrounds, entities.
    */
-  Board(tmx::Map *map) : map{map} { parse_map(); }
+  Board(SceneBase* scene, tmx::Map *map) : GamePiece(scene), map{map} { parse_map(); }
 
   /**
    * @brief Return the tmx::Map used by this board.
@@ -26,7 +27,7 @@ class Board : public DataChangeSource {
   tmx::Map *get_map() const { return map; }
 
   /** @brief Every token present on the loaded map */
-  std::list<Token> tokens = {};
+  std::list<Token*> tokens = {};
 
   /** @brief Tiles on the background layer */
   std::vector<std::tuple<sf::Vector2i, int>> backgroundGraphics;
@@ -35,7 +36,7 @@ class Board : public DataChangeSource {
   std::string mapFolder;
 
   /** @brief Callback used to process changes to the map */
-  DataChangeCallback* mapDataChangedCallback = nullptr;
+  DataChangeCallback mapDataChangedCallback = nullptr;
 
  private:
   void extract_tokens(const tmx::ObjectGroup &tokenGroup);

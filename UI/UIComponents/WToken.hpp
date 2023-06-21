@@ -2,19 +2,20 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "../SpriteLoader/SpriteLoader.h"
-#include "../Tabletop/Token.hpp"
-#include "UIBinding.hpp"
-#include "WButton.hpp"
-#include "WLine.hpp"
+#include "../../SpriteLoader/SpriteLoader.h"
+#include "../../Tabletop/Token.hpp"
+#include "../../TooDeeEngine/UI/UIBinding.hpp"
+#include "../../TooDeeEngine/UI/WButton.hpp"
+#include "../../TooDeeEngine/UI/WLine.hpp"
+#include "../../TooDeeEngine/Components/UIComponent.hpp"
 
 /**
  * @brief This displays a token on the map.
  * By default the token will be a red circle with a black outline.
  */
-class WToken : public WButton {
+class TokenUIComponent : public UIComponent {
  public:
-  WToken(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const Token &token,
+  TokenUIComponent(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const Token* token,
          Binding<sf::Vector2i> moveBinding);
 
   virtual void event_begin_mouse_over() override { set_outline_color(sf::Color::White); }
@@ -26,6 +27,8 @@ class WToken : public WButton {
   /** @brief The Token displayed by this Widget */
   const Token *token;
 
+  std::function<void()> onClickCallback;
+
  protected:
   virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
@@ -36,6 +39,7 @@ class WToken : public WButton {
   virtual bool event_mouse_down(const sf::Vector2i &mousePos) override;
   virtual void event_mouse_moved(const sf::Vector2i &mousePos) override;
   virtual bool event_mouse_up(const sf::Vector2i &mousePos) override;
+  virtual bool event_clicked() override { if (onClickCallback) onClickCallback(); return true;}
 
   /**
    * @brief Get the full radius of the token, including the outline.

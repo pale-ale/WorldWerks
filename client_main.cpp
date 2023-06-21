@@ -1,11 +1,12 @@
 #include <SFML/Graphics.hpp>
 
-#include "SpriteLoader/SpriteLoader.h"
-#include "UI/InputManager.hpp"
-#include "UI/UISystem.hpp"
-#include "Scene/SceneManager.hpp"
-#include "Scene/GameScene.hpp"
+#include "../TooDeeEngine/Scene/SceneManager.hpp"
+#include "../TooDeeEngine/UI/InputManager.hpp"
+#include "../TooDeeEngine/UI/UISystem.hpp"
 #include "MapParser/MapParser.hpp"
+#include "Scene/GameScene.hpp"
+#include "Scene/MainMenuScene.hpp"
+#include "SpriteLoader/SpriteLoader.h"
 
 bool RUNNING = true;
 int PIXELSCALE = 2;
@@ -50,7 +51,7 @@ int main() {
       inputManager.process_event(event, {(int)mp.x, (int)mp.y});
     }
     windowTexture.draw(sceneManager);
-    if (sceneManager.sceneContext.clientEp){
+    if (sceneManager.sceneContext.clientEp) {
       sceneManager.sceneContext.clientEp->digest_incoming();
     }
     windowTexture.display();

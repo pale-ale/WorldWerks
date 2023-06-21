@@ -1,14 +1,14 @@
 #include "WToken.hpp"
 
-#include "../Util/Math.hpp"
+#include "../../TooDeeEngine/Util/Math.hpp"
 
-WToken::WToken(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const Token &token,
+TokenUIComponent::TokenUIComponent(UISystem *uiSystem, std::weak_ptr<UIElement> parent, const Token* token,
                Binding<sf::Vector2i> moveBinding)
-    : WButton(uiSystem, parent), token{&token}, moveBinding{moveBinding} {
+    : UIComponent(uiSystem, parent), token{token}, moveBinding{moveBinding} {
   setup_sprite();
 }
 
-bool WToken::is_mouse_inside(const sf::Vector2i &mousePos) {
+bool TokenUIComponent::is_mouse_inside(const sf::Vector2i &mousePos) {
   auto &pos = sprite.getPosition();
   float dx = mousePos.x - pos.x;
   float dy = mousePos.y - pos.y;
@@ -19,7 +19,7 @@ bool WToken::is_mouse_inside(const sf::Vector2i &mousePos) {
 /**
  * @brief Change the color of the Widget's outline.
  */
-void WToken::set_outline_color(sf::Color color) {
+void TokenUIComponent::set_outline_color(sf::Color color) {
   tokenShape.setOutlineColor(color);
   rtex->draw(tokenShape);
   rtex->display();
@@ -29,7 +29,7 @@ void WToken::set_outline_color(sf::Color color) {
 /**
  * @brief Initialize textures and the sprite.
  */
-void WToken::setup_sprite() {
+void TokenUIComponent::setup_sprite() {
   rtex = new sf::RenderTexture();
   if (!rtex->create(get_full_radius() * 2, get_full_radius() * 2)) {
     exit(1);
@@ -47,14 +47,14 @@ void WToken::setup_sprite() {
   sprite.setOrigin(get_full_radius(), get_full_radius());
 }
 
-void WToken::draw(sf::RenderTarget &target, sf::RenderStates states) const {
-  WButton::draw(target, states);
+void TokenUIComponent::draw(sf::RenderTarget &target, sf::RenderStates states) const {
+  UIComponent::draw(target, states);
   if (line) {
     target.draw(*line);
   }
 }
 
-bool WToken::event_mouse_down(const sf::Vector2i &mousePos) {
+bool TokenUIComponent::event_mouse_down(const sf::Vector2i &mousePos) {
   if (is_mouse_inside(mousePos)) {
     bBeingDragged = true;
     return true;
@@ -62,7 +62,7 @@ bool WToken::event_mouse_down(const sf::Vector2i &mousePos) {
   return false;
 }
 
-void WToken::event_mouse_moved(const sf::Vector2i &mousePos) {
+void TokenUIComponent::event_mouse_moved(const sf::Vector2i &mousePos) {
   if (bBeingDragged) {
     auto parentPos = get_parent_position();
     auto relativePos = mousePos - parentPos;
@@ -70,7 +70,7 @@ void WToken::event_mouse_moved(const sf::Vector2i &mousePos) {
   }
 }
 
-bool WToken::event_mouse_up(const sf::Vector2i &mousePos) {
+bool TokenUIComponent::event_mouse_up(const sf::Vector2i &mousePos) {
   if (bBeingDragged) {
     bBeingDragged = false;
     if (moveBinding.set) {

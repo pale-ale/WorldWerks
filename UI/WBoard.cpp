@@ -2,9 +2,10 @@
 
 #include "TokenUI.hpp"
 
-WBoard::WBoard(UISystem* uiSystem, std::shared_ptr<UIElement> parent, Board* board,
-               SpriteLoader* spriteloader, const sf::Vector2i& size)
+WBoard::WBoard(UISystem* uiSystem, std::weak_ptr<UIElement> parent, Board* board,
+               const sf::Vector2i& size)
     : UIElement(uiSystem, parent, "WBoard", size), board{board} {
+  name = "WBoard";
   LiveStorage::storage["Background.tsx"].updateListeners.push_back([this](auto s) {
     LiveStorage::storage[get_bg_tileset_key()].updateListeners.push_back(
         [this](auto s) { update_background(); });
@@ -71,13 +72,16 @@ void WBoard::post_init() {
  */
 void WBoard::update_tokens() {
   children.clear();
-  for (auto&& token : board->tokens) {
-    auto positionSetter = [&token](const sf::Vector2i& v) { token.set_position(v); };
+  for (auto token : board->tokens) {
+    auto positionSetter = [&token](const sf::Vector2i& v) { token->set_position(v); };
     Binding<sf::Vector2i> binding{{}, positionSetter};
-    auto tokenButton =
-        uiSystem->create_widget<WToken>(shared_from_this(), token, binding);
-    tokenButton->buttonClickCallback = [this, &token]() { display_token(&token); };
-    tokens.push_back(tokenButton.get());
+    auto tokenWidget =
+        uiSystem->create_widget<TokenUIComponent>(shared_from_this(), token, binding);
+    token->add_callback([&token, tokenWidget](auto* _) {
+      tokenWidget->update_position(token->get_position());
+    });
+    tokenWidget->onClickCallback = [this, token]() { display_token(token); };
+    tokens.push_back(tokenWidget.get());
   }
 }
 
@@ -107,7 +111,7 @@ void WBoard::display_token(Token* token) {
  * @brief Redraw the board with a new texture rect with pan and zoom applied.
  */
 void WBoard::update_board_view() {
-  std::for_each(tokens.begin(), tokens.end(), [this](WToken* token) {
+  std::for_each(tokens.begin(), tokens.end(), [this](TokenUIComponent* token) {
     auto t = this->boardSprite.getTransform();
     token->update_position(
         sf::Vector2i(t.transformPoint((sf::Vector2f(token->token->get_position())))));

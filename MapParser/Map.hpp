@@ -2,14 +2,15 @@
 #include <map>
 #include <vector>
 
-#include "../3rdParty/tinyxml2.hpp"
+#include "../TooDeeEngine/3rdParty/tinyxml2.hpp"
 #include "../Data/DataNode.hpp"
-#include "../Storage/LiveStorage.hpp"
-#include "../Util/Log.hpp"
+#include "../TooDeeEngine/Storage/LiveStorage.hpp"
+#include "../TooDeeEngine/Util/Log.hpp"
 #include "Layer.hpp"
 #include "ObjectGroup.hpp"
 #include "Tileset.hpp"
 #include "filesystem"
+
 
 namespace tmx {
 /**
@@ -42,14 +43,11 @@ const std::map<std::string, ENodeType> NodeNameTypeMap{
  */
 struct Map : public DataNode {
   Map(XMLElement* element, const char* documentPath)
-      : DataNode(element), documentPath{documentPath} {}
+      : DataNode(element, nullptr), documentPath{documentPath} {}
   virtual void update_data() override;
   virtual void commit_data() override;
-  std::tuple<std::string, int, bool> get_tileset_info(XMLElement* element);
 
-  virtual bool fetch_data(const std::string& key, std::string& data) override {
-    return LiveStorage::retrieve(key, data);
-  }
+  std::tuple<std::string, int, bool> get_tileset_info(XMLElement* element);
 
   /** @brief The width of the map in no. of tiles */
   int width;
@@ -73,12 +71,12 @@ struct Map : public DataNode {
   std::filesystem::path documentPath;
 
   /** @brief Tile Layers in this map */
-  std::vector<Layer*> layers;
+  std::vector<std::unique_ptr<Layer>> layers;
 
   /** @brief Object Layers in this map */
-  std::vector<ObjectGroup*> objectGroups;
+  std::vector<std::unique_ptr<ObjectGroup>> objectGroups;
 
   /** @brief Tilesets referenced by this map */
-  std::vector<Tileset*> tilesets;
+  std::vector<std::unique_ptr<Tileset>> tilesets;
 };
 }  // namespace tmx

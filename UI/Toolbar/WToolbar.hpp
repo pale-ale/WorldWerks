@@ -3,8 +3,8 @@
 
 #include <numeric>
 
-#include "../Colors.hpp"
-#include "../UIElement.hpp"
+#include "../../TooDeeEngine/UI/Colors.hpp"
+#include "../../TooDeeEngine/UI/UIElement.hpp"
 
 /**
  * @brief This class can be used to display a set of tools the user can interact with.

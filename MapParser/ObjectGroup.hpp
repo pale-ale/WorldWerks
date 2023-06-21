@@ -2,7 +2,8 @@
 #include <string>
 #include <vector>
 
-#include "../3rdParty/tinyxml2.hpp"
+#include "../TooDeeEngine/3rdParty/tinyxml2.hpp"
+
 #include "../Data/DataNode.hpp"
 #include "Object.hpp"
 
@@ -17,11 +18,12 @@ struct ObjectGroup : public DataNode {
     get_attribute("id", &id, true, "int");
     get_attribute("name", &name, true, "string");
 
-    for (auto&& child = element->FirstChildElement(); child;
+    for (auto&& child = nodeData->element->FirstChildElement(); child;
          child = child->NextSiblingElement()) {
       Object* obj = new Object(child, this);
       obj->update_data();
       objects.push_back(obj);
+      children.push_back(obj);
     }
   }
 

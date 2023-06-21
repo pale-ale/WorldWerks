@@ -12,11 +12,11 @@ struct Layer : DataNode {
 
   virtual void update_data() override {
     bool errors = false;
-    errors |= (bool)element->QueryAttribute("id", &id);
-    errors |= (bool)element->QueryAttribute("width", &width);
-    errors |= (bool)element->QueryAttribute("height", &height);
-    errors |= (bool)element->QueryAttribute("name", &name);
-    auto child = element->FirstChildElement("data");
+    errors |= (bool)nodeData->element->QueryAttribute("id", &id);
+    errors |= (bool)nodeData->element->QueryAttribute("width", &width);
+    errors |= (bool)nodeData->element->QueryAttribute("height", &height);
+    errors |= (bool)nodeData->element->QueryAttribute("name", &name);
+    auto child = nodeData->element->FirstChildElement("data");
     errors |= child == nullptr;
 
     if (errors){

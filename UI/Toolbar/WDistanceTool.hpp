@@ -1,7 +1,7 @@
 #pragma once
-#include "../../Util/Math.hpp"
-#include "../WLine.hpp"
-#include "../WTextbox.hpp"
+#include "../../TooDeeEngine/UI/WLine.hpp"
+#include "../../TooDeeEngine/UI/WTextbox.hpp"
+#include "../../TooDeeEngine/Util/Math.hpp"
 #include "WTool.hpp"
 
 class WDistanceTool : public WTool {

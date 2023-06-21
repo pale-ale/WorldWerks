@@ -1,6 +1,6 @@
 #include "TokenUI.hpp"
 
-#include "../Util/Log.hpp"
+#include "../TooDeeEngine/Util/Log.hpp"
 
 TokenUI::TokenUI(UISystem *uiSystem, std::weak_ptr<UIElement> parent,
                  const sf::Vector2i &size)
@@ -21,7 +21,8 @@ void TokenUI::set_token(Token *token) {
   displayedToken = token;
   if (token) {
     tokenTitle->set_text_binding({[token] { return token->get_title(); },
-                                  [token](auto str) { token->set_title(str); }});
+                                  [token](auto str) { token->set_title(str);}});
+    tokenTitle->endEditCallback = [token](){token->send_data_changed();};
     tokenHitpoints->set_current([token] { return 5; });
     tokenHitpoints->set_max([token] { return 15; });
   }

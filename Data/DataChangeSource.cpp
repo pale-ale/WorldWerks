@@ -1,6 +1,6 @@
 #include "DataChangeSource.hpp"
 
-#include "../Util/Log.hpp"
+#include "../TooDeeEngine/Util/Log.hpp"
 
 /**
  * @brief Add a new callback, which is not already listening.
@@ -27,8 +27,8 @@ void DataChangeSource::remove_callback(DataChangeCallback callback) {
  * @brief Call the registered callbacks.
  */
 void DataChangeSource::send_data_changed() {
-  for (auto& callback : callbacks) {
-    callback(this);
+  for (auto&& callback : callbacks) {
+      callback(this);
   }
 }
 

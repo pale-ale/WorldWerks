@@ -5,9 +5,9 @@
 #include <thread>
 
 #include "MapParser/MapParser.hpp"
-#include "Net/ServerEndpoint.hpp"
-#include "Storage/LiveStorage.hpp"
-#include "Util/Util.hpp"
+#include "TooDeeEngine/Net/ServerEndpoint.hpp"
+#include "TooDeeEngine/Storage/LiveStorage.hpp"
+#include "TooDeeEngine/Util/Util.hpp"
 
 ServerEndpoint serverEp("127.0.0.1", 12345);
 fs::path mapPath = get_home_dir().string() + std::string("/WorldWerksMaps/");
@@ -46,8 +46,9 @@ int main(int argc, char* argv[]) {
       }
       LOGINF("Server", fmt::format("Loading map at '{}'.", mapPath.c_str()));
       LiveStorage::useLocalFiles = true;
-      LiveStorage::missingResourceHandler = [](auto srcName){
-        LiveStorage::read_file_to_storage((mapPath.remove_filename() / srcName).c_str(), srcName);
+      LiveStorage::missingResourceHandler = [](auto srcName) {
+        LiveStorage::read_file_to_storage((mapPath.remove_filename() / srcName).c_str(),
+                                          srcName);
         return EStorageElementState::LOCAL_READY;
       };
       mp.load_file(mapPath);
@@ -61,7 +62,7 @@ int main(int argc, char* argv[]) {
       break;
     }
   }
-
+ 
   LOGINF("Server", "Loaded map.");
   serverEp.callbacks[wwnet::EMessageType::REQ_MAP].push_back(
       [](int clientFd, const std::string& _) {
@@ -77,8 +78,31 @@ int main(int argc, char* argv[]) {
         LiveDataCapsule cap{key, data};
         serverEp.send_single(clientfd, wwnet::RES_RES, cap.to_msg().c_str());
       });
+  // serverEp.callbacks[wwnet::EMessageType::REQ_APPLY].push_back(
+  //     [](int clientfd, const std::string& data) {
+  //       tinyxml2::XMLDocument doc;
+  //       doc.Parse(data.c_str());
+  //       XMLElement* elem = doc.FirstChildElement();
+  //       int id;
+  //       auto result = elem->QueryAttribute("id", &id);
+  //       if (result != tinyxml2::XMLError::XML_SUCCESS) {
+  //         LOGERR("Server",
+  //                "Received ill-formatted apply request. Discarding this one...");
+  //       }
+  //       for (auto && og : mp.map->objectGroups) {
+  //         if (strcmp(og->name, "Entities") == 0) {
+  //           for (auto obj : og->objects) {
+  //             if (obj->id == id) {
+  //               memcpy(obj->nodeData->element, elem, sizeof(tinyxml2::XMLElement));
+  //               obj->update_data();
+  //             }
+  //           }
+  //         }
+  //       }
+  //       serverEp.send_all(wwnet::EMessageType::RES_APPLY, data.c_str());
+  //     });
 
-  for (int i = 0; i < 20; i++) {
+  for (int i = 0; i < 30; i++) {
     auto conn = serverEp.accept_connection();
     if (conn.clientFd != -1) {
       serverEp.connections.push_back(conn);

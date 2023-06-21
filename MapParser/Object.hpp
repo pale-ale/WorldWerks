@@ -18,6 +18,7 @@ struct Object : public DataNode {
     // set_attribute("width", width);
     // set_attribute("height", height);
     // set_attribute("gid", gid);
+    nodeData->send_data_changed();
   }
 
   virtual void update_data() override {
@@ -30,7 +31,9 @@ struct Object : public DataNode {
     get_attribute("height", &height);
     get_attribute("gid", &gid);
     name = cname;
+    send_data_changed();
   }
+
   int id;                    /** @brief The id of this object in it's tileset */
   int gid;                   /** @brief The global id, spanning over tilesets */
   int x, y;                  /** @brief The object's position in Tiled units */

@@ -1,11 +1,13 @@
+#include "MainMenuScene.hpp"
+
 #include <string>
 
-#include "../Net/ClientEndpoint.hpp"
-#include "../UI/WButton.hpp"
-#include "../UI/WTextbox.hpp"
+#include "../TooDeeEngine/Net/ClientEndpoint.hpp"
+#include "../TooDeeEngine/Scene/SceneBase.hpp"
+#include "../TooDeeEngine/Scene/SceneManager.hpp"
+#include "../TooDeeEngine/UI/WButton.hpp"
+#include "../TooDeeEngine/UI/WTextbox.hpp"
 #include "GameScene.hpp"
-#include "SceneBase.hpp"
-#include "SceneManager.hpp"
 
 MainMenuScene::MainMenuScene(SceneManager* sm, SceneContext* sceneContext)
     : SceneBase(sm, sceneContext) {
@@ -30,10 +32,11 @@ void MainMenuScene::event_load_scene() {
                                    {[this](std::string text) { this->port = text; }}};
 
   ipTb = uiSys->create_widget<WTextbox>(root, ipBinding, ipSize, ipPos, "IPBox");
-  portTb = uiSys->create_widget<WTextbox>(root, portBinding, portSize, portPos, "PortBox");
+  portTb =
+      uiSys->create_widget<WTextbox>(root, portBinding, portSize, portPos, "PortBox");
   joinBtn = uiSys->create_widget<WButton>(root, joinSize, joinPos, "JoinButton");
   joinBtn->buttonClickCallback = [this]() { this->event_join_clicked(); };
-  joinBtn->text.lock()->set_text_binding({[](){return "Join";}});
+  joinBtn->text.lock()->set_text_binding({[]() { return "Join"; }});
   LOGINF("MainMenuScene", "Loaded.");
 }
 
