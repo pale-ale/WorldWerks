@@ -72,8 +72,8 @@ class DataNode : public DataChangeSource {
    * @param typeHint Used for debugging, displays the expected type
    * @return true on success, false if attribute missing or of wrong type
    */
-  template <typename T>
-  bool get_attribute(std::string fieldName, T *out, bool required = false,
+  template <typename R>
+  bool get_attribute(std::string fieldName, R *out, bool required = false,
                      const char *typeHint = "<Add a type hint!>") {
     auto ret = nodeData->element->QueryAttribute(fieldName.c_str(), out);
     bool success = ret == tinyxml2::XML_SUCCESS;
@@ -104,8 +104,8 @@ class DataNode : public DataChangeSource {
    * @param fieldName The name of the attribute we want to set/create
    * @param value The value the attribute will receive
    */
-  template <typename T>
-  void set_attribute(std::string fieldName, const T &value) {
+  template <typename R>
+  void set_attribute(std::string fieldName, const R &value) {
     nodeData->element->SetAttribute(fieldName.c_str(), value);
   }
 

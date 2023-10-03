@@ -23,8 +23,8 @@ class WToolbar : public UIElement {
    * @tparam T Any container type that supports range-based for loops
    * @param tools The tools we want to add to this toolbar
    */
-  template <class T>
-  void set_tools(T tools) {
+  template <class R>
+  void set_tools(R tools) {
     for (std::shared_ptr<UIElement> tool : tools) {
       add_child(tool);
     }

@@ -11,7 +11,7 @@
 class Token : public GamePiece, public DataChangeSource {
  public:
   Token(SceneBase* scene, int id, sf::Vector2i pos, std::string title)
-      : GamePiece(scene), DataChangeSource(), tokenID{id}, title{title} {name = title;}//set_position(pos);}
+      : GamePiece(scene), DataChangeSource(), tokenID{id}, title{title} {name = title; set_position(pos);}
   Token() = delete;
   Token(Token&) = delete;
   Token(const Token&) = delete;
@@ -21,7 +21,6 @@ class Token : public GamePiece, public DataChangeSource {
 
  private:
   
-
   /** @brief The title given the token */
   std::string title;
 

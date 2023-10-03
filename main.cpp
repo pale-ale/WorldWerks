@@ -1,39 +1,14 @@
-#include <iostream>
-#include "TooDeeEngine/3rdParty/cereal/archives/xml.hpp"
-#include "TooDeeEngine/3rdParty/cereal/types/memory.hpp"
-#include <string.h>
+#include "TooDeeEngine/Net/RPC.hpp"
 
-using std::cout;
-using std::endl;
-using std::string;
-
-void call_me(int i){
-  cout << "I was called!" << i << endl;
-}
-
-struct Entity {
-  std::string name;
-  int age;
-
-  template <typename Archive>
-  void serialize(Archive &ar){
-    ar(name, age);
-  }
-  Entity(std::string name = "name", int age = 10):name{name}, age{age}{};
-};
+void testfunction(int a, string e, float f){cout << a << ", " << e << ", " << f << ", " << endl;}
 
 int main(){
-  std::stringstream ss;
-  {
-    auto e = std::make_unique<Entity>("testa", 5);
-    cereal::XMLOutputArchive oa(std::cout);
-    oa(e);
-  }
-  // {
-  //   auto e = std::shared_ptr<EntityTwo>{nullptr};
-  //   cereal::BinaryInputArchive ia(ss);
-  //   ia(e);
-  //   cout << e->name << endl;
-  // }
+  RPCHandler rpchandler;
+  rpchandler.bindFunc("test", testfunction);
+  auto ss = rpchandler.serialize("test", 10, string("test"), -1.3f);
+  cout << ss << endl;
+  std::stringstream s(ss);
+  auto arch = cereal::XMLInputArchive(s);
+  rpchandler.funcs["test"](arch);
   return 0;
 }
